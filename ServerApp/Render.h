@@ -1,19 +1,11 @@
 #pragma once
 
-namespace sf {
-    class RenderWindow;
-    class Event;
-}
-
-
+#include <SFML/Graphics.hpp>
 
 struct Render {
     sf::RenderWindow* pWindow;
     sf::Event* pEvent;
     int iWidth;
     int iHeight;
-    void Update(); // Update SFML Render
+    void Update(); // Déplacez la déclaration de la méthode Update ici
 };
-
-
-

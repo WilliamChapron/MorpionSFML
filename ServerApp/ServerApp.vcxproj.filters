@@ -4,8 +4,11 @@
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Morpion.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="sv.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="ServerSocket.cpp" />
+    <ClCompile Include="Time.h" />
+    <ClCompile Include="GameManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render.h" />
@@ -13,5 +16,7 @@
     <ClInclude Include="Morpion.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Defines.h" />
+    <ClInclude Include="ServerSocket.h" />
+    <ClInclude Include="GameManager.h" />
   </ItemGroup>
 </Project>

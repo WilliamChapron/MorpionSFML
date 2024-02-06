@@ -13,48 +13,21 @@ Morpion::Morpion() {
     }
 }
 
-int Morpion::placeSymbol(Render render) {
-    sf::Vector2i mousePosition = getMousePosition(render); // Obtenez la position de la souris
+int Morpion::placeSymbol(int cellIndex) {
+    int row = cellIndex / 3;
+    int col = cellIndex % 3;
 
-    int iCol = 3;
- 
-
-    const float cellWidth = CALCULATE_CELL_SIZE(render.iWidth, iCol, 5);
-    const float cellHeight = CALCULATE_CELL_SIZE(render.iHeight, iCol, 5);
-
-
-    int indexX = CALCULATE_MOUSE_TO_INDEX(mousePosition.x, 5, cellWidth);
-    int IndexY = CALCULATE_MOUSE_TO_INDEX(mousePosition.y, 5, cellHeight);
-
-    int globalIndex = (IndexY * iCol) + indexX;
-
-    PRINT(globalIndex);
-    for (const auto& element : board) {
-        switch (element) {
-        case Symbol::X:
-            std::cout << "X" << std::endl;  // Affiche un texte pour le symbole X
-            break;
-        case Symbol::O:
-            std::cout << "O" << std::endl;  // Affiche un texte pour le symbole O
-            break;
-            // Ajoutez d'autres cas au besoin pour chaque symbole
-        case Symbol::Empty:
-            std::cout << "Autre" << std::endl;  // Cas par défaut si le symbole n'est pas X ou O
-        }
-    }
-
-    if (board[globalIndex] == Symbol::Empty) {
-        PRINT("Empty")
-        board[globalIndex] = currentPlayer->symbol;
+    if (board[cellIndex] == Symbol::Empty) {
+        // Placer le symbole du joueur actuel dans la cellule
+        board[cellIndex] = currentPlayer->symbol;
         return 0;
     }
-    
-    PRINT("No Empty")
-    return 1;
-
-
-
+    else {
+        // La cellule n'est pas vide
+        return 1;
+    }
 }
+
 
 
 bool Morpion::checkHorizontalWin(Symbol playerSymbol) const {
@@ -170,4 +143,21 @@ void Morpion::drawBoard(Render render) const {
     render.pWindow->display();
 }
 
+std::string Morpion::getBoardState() const {
+    std::string state;
+    for (const auto& symbol : board) {
+        switch (symbol) {
+        case Symbol::X:
+            state += "X";
+            break;
+        case Symbol::O:
+            state += "O";
+            break;
+        case Symbol::Empty:
+            state += "-";
+            break;
+        }
+    }
+    return state;
+}
 

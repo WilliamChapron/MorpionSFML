@@ -1,8 +1,10 @@
 #include "Render.h"
-#include <iostream>
 
-// Définition des méthodes de la structure Point
-
-void Update() {
-
+void Render::Update() {
+    sf::Event event;
+    while (pWindow->pollEvent(event)) {
+        if (event.type == sf::Event::Closed) {
+            pWindow->close();
+        }
+    }
 }
