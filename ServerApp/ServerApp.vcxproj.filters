@@ -8,6 +8,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="ServerSocket.cpp" />
     <ClCompile Include="Time.h" />
+    <ClCompile Include="Includes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render.h" />

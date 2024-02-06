@@ -8,11 +8,8 @@
 
 //
 
-#include <Ws2tcpip.h>  // Ajout de l'en-tête pour inet_pton
-#include <iostream>
-#include <Winsock2.h>
-#pragma comment(lib, "ws2_32.lib")
 
+#include "Includes.h"
 #include "ServerSocket.h"
 #include "Defines.h"
 
@@ -35,94 +32,153 @@
 //    return true;
 //}
 
+#include <iostream>
+#include <windows.h>
+#include "ServerSocket.h"
 
-int main(int argc, char** argv)
-{
-
-    std::cout << "SERVER" << std::endl;
-    
-
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        std::cerr << "Failed to initialize Winsock." << std::endl;
-        return 1;
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    switch (uMsg) {
+    case WM_SOCKET:
+        OutputDebugStringA("Un socket detecté");
+        break;
+    default:
+        return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
-
-    ServerSocket server(80);
-    if (server.StartListening()) {
-        server.HandleClients();
-    }
-
     return 0;
+}
 
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    // Créer la fenêtre
+    WNDCLASS wc = {};
+    wc.lpfnWndProc = WindowProc;
+    wc.hInstance = hInstance;
+    wc.lpszClassName = L"ServerWindowClass";
 
+    RegisterClass(&wc);
 
+    HWND hwnd = CreateWindowEx(
+        0,
+        L"ServerWindowClass",
+        L"Server App",
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT, 800, 600,
+        0,
+        0,
+        hInstance,
+        0);
 
+    if (!hwnd)
+        return -1;
+    OutputDebugStringA("dsdds");
 
+    ShowWindow(hwnd, SW_SHOW);
 
-    ////Création d'une fenêtre
-    //Render myRenderer{new sf::RenderWindow(sf::VideoMode(640, 480), "SFML"), new sf::Event, 640, 480};
-    //Morpion* myMorpion;
-    //myMorpion = new Morpion;
+    // Initialiser et démarrer le serveur
+    ServerSocket server(80);
+    if (!server.StartAsyncListening(hwnd)) {
+        // Gérer l'échec de démarrage du serveur
+        return -1;
+    }
 
-    //Player* player1 = nullptr;
-    //player1 = new Player{ "William", Symbol::X, 0};
-
-    //Player* player2 = nullptr;
-    //player2 = new Player{ "Bot", Symbol::O, 0 };
-
-
-    ////GameLoop
-    //myMorpion->drawBoard(myRenderer);
-    //myMorpion->currentPlayer = player1;
-    //int turnCounter = 0;
-    //while (myRenderer.pWindow->isOpen())
-    //{
-
-    //    
-
-
-    //    //EVENT
-    //    int inputState = updateInput(myRenderer);
-    //    //PRINT(myMorpion.currentPlayer->name)
-    //    if (inputState == 0) {
-    //        //PRINT("Pas d'Input")
-    //        continue;
-    //    }
-    //    else if(inputState == 1) {
-    //        if (!turn(myRenderer, myMorpion, turnCounter))
-    //        {
-    //            continue;
-    //        };
-    //    }
-
-
-
-
-   
-
-
-
-    //    //PRINT("Action")
-
-    //    //UPDATE
-
-    //    //DRAW
-    //    if (myMorpion->checkEnd(Symbol::X) || myMorpion->checkEnd(Symbol::O)) {
-    //        PRINT("Partie terminé, joueur gagnant :")
-    //        PRINT(myMorpion->currentPlayer->name);
-    //        //break;
-    //    }
-
-    //    // Transition next it
-    //    myMorpion->currentPlayer = (turnCounter % 2 == 0) ? player2 : player1;
-    //    turnCounter++;
-
-
-    //}
+    // Utiliser une boucle simple pour maintenir l'application active
+    MSG msg = {};
+    while (GetMessage(&msg, 0, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
 
     return 0;
 }
+
+
+
+//int main(int argc, char** argv)
+//{
+//
+//    std::cout << "SERVER" << std::endl;
+//    
+//
+//    WSADATA wsaData;
+//    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+//        std::cerr << "Failed to initialize Winsock." << std::endl;
+//        return 1;
+//    }
+//
+//    ServerSocket server(80);
+//    if (server.StartListening()) {
+//        server.HandleClients();
+//    }
+//
+//    return 0;
+//
+//
+//
+//
+//
+//
+//    ////Création d'une fenêtre
+//    //Render myRenderer{new sf::RenderWindow(sf::VideoMode(640, 480), "SFML"), new sf::Event, 640, 480};
+//    //Morpion* myMorpion;
+//    //myMorpion = new Morpion;
+//
+//    //Player* player1 = nullptr;
+//    //player1 = new Player{ "William", Symbol::X, 0};
+//
+//    //Player* player2 = nullptr;
+//    //player2 = new Player{ "Bot", Symbol::O, 0 };
+//
+//
+//    ////GameLoop
+//    //myMorpion->drawBoard(myRenderer);
+//    //myMorpion->currentPlayer = player1;
+//    //int turnCounter = 0;
+//    //while (myRenderer.pWindow->isOpen())
+//    //{
+//
+//    //    
+//
+//
+//    //    //EVENT
+//    //    int inputState = updateInput(myRenderer);
+//    //    //PRINT(myMorpion.currentPlayer->name)
+//    //    if (inputState == 0) {
+//    //        //PRINT("Pas d'Input")
+//    //        continue;
+//    //    }
+//    //    else if(inputState == 1) {
+//    //        if (!turn(myRenderer, myMorpion, turnCounter))
+//    //        {
+//    //            continue;
+//    //        };
+//    //    }
+//
+//
+//
+//
+//   
+//
+//
+//
+//    //    //PRINT("Action")
+//
+//    //    //UPDATE
+//
+//    //    //DRAW
+//    //    if (myMorpion->checkEnd(Symbol::X) || myMorpion->checkEnd(Symbol::O)) {
+//    //        PRINT("Partie terminé, joueur gagnant :")
+//    //        PRINT(myMorpion->currentPlayer->name);
+//    //        //break;
+//    //    }
+//
+//    //    // Transition next it
+//    //    myMorpion->currentPlayer = (turnCounter % 2 == 0) ? player2 : player1;
+//    //    turnCounter++;
+//
+//
+//    //}
+//
+//    return 0;
+//}
 
 //#include <iostream>
 //#include <Ws2tcpip.h>  // Ajout de l'en-tête pour inet_pton
