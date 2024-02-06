@@ -6,6 +6,7 @@
     <ClCompile Include="Morpion.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="ServerSocket.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render.h" />
@@ -13,5 +14,6 @@
     <ClInclude Include="Morpion.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Defines.h" />
+    <ClInclude Include="ServerSocket.h" />
   </ItemGroup>
 </Project>

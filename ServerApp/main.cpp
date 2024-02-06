@@ -1,10 +1,10 @@
 
-#include <SFML/Graphics.hpp>
-#include "Render.h"
-#include "Input.h"
-#include "Morpion.h"
-#include "Player.h"
-#include "Defines.h"
+//#include <SFML/Graphics.hpp>
+//#include "Render.h"
+//#include "Input.h"
+//#include "Morpion.h"
+//#include "Player.h"
+//#include "Defines.h"
 
 //
 
@@ -13,107 +13,95 @@
 #include <Winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
 
-bool turn(Render render, Morpion* morpion, int turnCounter) {
-    int placeState = morpion->placeSymbol(render);
-    if (placeState == 1) {
-        std::cout << "Erreur de placement du symbole. Impossible de placer à cet emplacement." << std::endl;
-        return false;
-    }
+#include "ServerSocket.h"
 
-    std::cout << "Tour " << turnCounter << ": ";
-    std::cout << "Joueur actuel : " << morpion->currentPlayer->name << ", Symbole : " << static_cast<char>(morpion->currentPlayer->symbol) << std::endl;
-
-    morpion->drawBoard(render);
-
-    return true;
-}
+//bool turn(Render render, Morpion* morpion, int turnCounter) {
+//    int placeState = morpion->placeSymbol(render);
+//    if (placeState == 1) {
+//        std::cout << "Erreur de placement du symbole. Impossible de placer à cet emplacement." << std::endl;
+//        return false;
+//    }
+//
+//    std::cout << "Tour " << turnCounter << ": ";
+//    std::cout << "Joueur actuel : " << morpion->currentPlayer->name << ", Symbole : " << static_cast<char>(morpion->currentPlayer->symbol) << std::endl;
+//
+//    morpion->drawBoard(render);
+//
+//    return true;
+//}
 
 
 int main(int argc, char** argv)
 {
     std::cout << "SERVER" << std::endl;
-    // Initialize WSA variables
-    WSADATA wsaData;
-    int wsaerr;
-    WORD wVersionRequested = MAKEWORD(2, 2);
-    wsaerr = WSAStartup(wVersionRequested, &wsaData);
+    
 
-    // Check for initialization success
-    if (wsaerr != 0) {
-        std::cout << "The Winsock dll not found!" << std::endl;
-        return 0;
-    }
-    else {
-        std::cout << "The Winsock dll found" << std::endl;
-        std::cout << "The status: " << wsaData.szSystemStatus << std::endl;
-    }
+    //WSADATA wsaData;
+    //WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-    // Create a socket
-    SOCKET listenSocket;
-    listenSocket = INVALID_SOCKET;
-    listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    //// Création du socket d'écoute
+    //SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-    // Check for socket creation success
-    if (listenSocket == INVALID_SOCKET) {
-        std::cout << "Error at socket(): " << WSAGetLastError() << std::endl;
-        WSACleanup();
-        return 0;
-    }
-    else {
-        std::cout << "Socket is OK!" << std::endl;
-    }
+    //// Configuration de l'adresse et du port
+    //sockaddr_in serverAddress;
+    //serverAddress.sin_family = AF_INET;
+    //serverAddress.sin_addr.s_addr = INADDR_ANY;
+    //serverAddress.sin_port = htons(55555);
 
-    // Configuration de l'adresse et du port
-    sockaddr_in serverAddress;
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_addr.s_addr = INADDR_ANY; // Utilisez INADDR_ANY pour accepter les connexions de n'importe quelle adresse
-    serverAddress.sin_port = htons(80);  // Choisissez un numéro de port
+    //// Liaison du socket d'écoute
+    //bind(listenSocket, (sockaddr*)&serverAddress, sizeof(serverAddress));
 
-    // Liage du socket à l'adresse et au port
-    if (bind(listenSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR) {
-        std::cerr << "Erreur lors de la liaison du socket à l'adresse et au port." << std::endl;
-        closesocket(listenSocket);
-        WSACleanup();
-        return 1;
-    }
+    //// Mise en attente des connexions entrantes
+    //listen(listenSocket, SOMAXCONN);
 
-    // Mettez le socket en mode écoute
-    if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
-        std::cerr << "Erreur lors de la mise en écoute du socket." << std::endl;
-        closesocket(listenSocket);
-        WSACleanup();
-        return 1;
+    //// Accepter une connexion entrante
+    //SOCKET clientSocket = accept(listenSocket, nullptr, nullptr);
+
+    //// Recevoir le message du client
+    //char buffer[1024];
+    //int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+
+    //// Vérifier si la réception a été réussie
+    //if (bytesRead > 0) {
+    //    buffer[bytesRead] = '\0';  // Ajouter le caractère de fin de chaîne
+    //    std::cout << "Message du client : " << buffer << std::endl;
+    //}
+
+    ServerSocket server(55555);
+    if (server.StartListening()) {
+        while (true) {
+            SOCKET clientSocket = server.AcceptConnection();
+            if (clientSocket != INVALID_SOCKET) {
+                char buffer[4096];
+                int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+                if (bytesRead > 0) {
+                    buffer[bytesRead] = '\0';
+                    std::cout << "Received from client: " << buffer << std::endl;
+                }
+
+                closesocket(clientSocket);
+            }
+        }
     }
 
-    SOCKET acceptSocket;
-    acceptSocket = accept(listenSocket, nullptr, nullptr);
 
-    // Check for successful connection
-    if (acceptSocket == INVALID_SOCKET) {
-        std::cout << "accept failed: " << WSAGetLastError() << std::endl;
-        closesocket(listenSocket);
-        WSACleanup();
-        return -1;
-    }
-    else {
-        std::cout << "accept() is OK!" << std::endl;
-    }
 
-    // Envoyer un message au client
-    const char* message = "Bienvenue sur le serveur!";
-    if (send(acceptSocket, message, strlen(message), 0) == SOCKET_ERROR) {
-        std::cerr << "Erreur lors de l'envoi du message au client." << std::endl;
-    }
+
 
     while (1);
-    // Fermer le socket d'écoute
-    closesocket(listenSocket);
 
-    // Fermer le socket accepté
-    closesocket(acceptSocket);
+    
 
-    // Libérer Winsock
-    WSACleanup();
+
+
+
+
+
+
+
+
+
+
     ////Création d'une fenêtre
     //Render myRenderer{new sf::RenderWindow(sf::VideoMode(640, 480), "SFML"), new sf::Event, 640, 480};
     //Morpion* myMorpion;
