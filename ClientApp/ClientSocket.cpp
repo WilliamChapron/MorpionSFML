@@ -1,6 +1,8 @@
 #include "ClientSocket.h"
+#include "Defines.h"
 
-ClientSocket::ClientSocket(const char* serverIp, int serverPort) {
+ClientSocket::ClientSocket(const char* serverIp, int serverPort) 
+{
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
     // Création du socket client
@@ -16,15 +18,20 @@ ClientSocket::ClientSocket(const char* serverIp, int serverPort) {
     serverAddress.sin_port = htons(serverPort);
 }
 
-ClientSocket::~ClientSocket() {
+ClientSocket::~ClientSocket() 
+{
     closesocket(clientSocket);
     WSACleanup();
 }
 
-bool ClientSocket::Connect() {
+bool ClientSocket::Connect() 
+{
+    PRINT("Connexion ... ");
     return connect(clientSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) != SOCKET_ERROR;
 }
 
-bool ClientSocket::SendMessage(const char* message) {
+bool ClientSocket::SendMessage(const char* message) 
+{
+    PRINT("Send message ... ");
     return send(clientSocket, message, strlen(message), 0) != SOCKET_ERROR;
 }

@@ -6,7 +6,8 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-class ClientSocket {
+class ClientSocket 
+{
 public:
     ClientSocket(const char* serverIp, int serverPort);
     ~ClientSocket();

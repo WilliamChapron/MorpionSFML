@@ -14,6 +14,11 @@
 #pragma comment(lib, "ws2_32.lib")
 
 #include "ServerSocket.h"
+#include "Defines.h"
+
+
+#include "Time.h"
+
 
 //bool turn(Render render, Morpion* morpion, int turnCounter) {
 //    int placeState = morpion->placeSymbol(render);
@@ -33,69 +38,22 @@
 
 int main(int argc, char** argv)
 {
+
     std::cout << "SERVER" << std::endl;
     
 
-    //WSADATA wsaData;
-    //WSAStartup(MAKEWORD(2, 2), &wsaData);
-
-    //// Création du socket d'écoute
-    //SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-    //// Configuration de l'adresse et du port
-    //sockaddr_in serverAddress;
-    //serverAddress.sin_family = AF_INET;
-    //serverAddress.sin_addr.s_addr = INADDR_ANY;
-    //serverAddress.sin_port = htons(55555);
-
-    //// Liaison du socket d'écoute
-    //bind(listenSocket, (sockaddr*)&serverAddress, sizeof(serverAddress));
-
-    //// Mise en attente des connexions entrantes
-    //listen(listenSocket, SOMAXCONN);
-
-    //// Accepter une connexion entrante
-    //SOCKET clientSocket = accept(listenSocket, nullptr, nullptr);
-
-    //// Recevoir le message du client
-    //char buffer[1024];
-    //int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-
-    //// Vérifier si la réception a été réussie
-    //if (bytesRead > 0) {
-    //    buffer[bytesRead] = '\0';  // Ajouter le caractère de fin de chaîne
-    //    std::cout << "Message du client : " << buffer << std::endl;
-    //}
-
-    ServerSocket server(55555);
-    if (server.StartListening()) {
-        while (true) {
-            SOCKET clientSocket = server.AcceptConnection();
-            if (clientSocket != INVALID_SOCKET) {
-                char buffer[4096];
-                int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-                if (bytesRead > 0) {
-                    buffer[bytesRead] = '\0';
-                    std::cout << "Received from client: " << buffer << std::endl;
-                }
-
-                closesocket(clientSocket);
-            }
-        }
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        std::cerr << "Failed to initialize Winsock." << std::endl;
+        return 1;
     }
 
+    ServerSocket server(80);
+    if (server.StartListening()) {
+        server.HandleClients();
+    }
 
-
-
-
-    while (1);
-
-    
-
-
-
-
-
+    return 0;
 
 
 
