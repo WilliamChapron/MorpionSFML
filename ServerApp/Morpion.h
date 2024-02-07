@@ -38,4 +38,6 @@ public:
     bool checkBoardFull() const;
 
     bool checkEnd(Symbol playerSymbol) const;
+
+    std::string getBoardState() const;
 };

@@ -6,7 +6,7 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-class ClientSocket 
+class ClientSocket
 {
 public:
     ClientSocket(const char* serverIp, int serverPort);
@@ -14,9 +14,10 @@ public:
 
     bool Connect();
     bool SendMessage(const char* message);
+    void Close();
 
 private:
     SOCKET clientSocket;
     sockaddr_in serverAddress;
-    WSADATA wsaData;  
+    WSADATA wsaData;
 };

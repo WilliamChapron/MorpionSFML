@@ -1,29 +1,26 @@
 #pragma once
 
-#include <WinSock2.h>
-#include <iostream>
+#include "Includes.h"
+#include "Defines.h"
 #include <vector>
+#include <string>
+
+
 
 class ServerSocket {
 public:
     ServerSocket(int port);
     ~ServerSocket();
 
-    bool StartListening();
-    SOCKET AcceptConnection();
-    // Handle Many Users
-
-    void HandleClients();
-
-    // 
-
+    bool StartAsyncListening(HWND* hwnd);
+    void AddClientSocket(SOCKET clientSocket, HWND* hwnd);
     void BroadcastMessage(const std::string& message);
-
-    //
     void Close();
-
-private:
     int port;
     SOCKET listenSocket;
     std::vector<SOCKET> clientSockets;
+
+private:
+
+
 };
