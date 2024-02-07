@@ -1,5 +1,7 @@
 #include "ClientSocket.h"
 #include "Defines.h"
+#include "Time.h"
+
 
 ClientSocket::ClientSocket(const char* serverIp, int serverPort) 
 {
@@ -30,8 +32,37 @@ bool ClientSocket::Connect()
     return connect(clientSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) != SOCKET_ERROR;
 }
 
-bool ClientSocket::SendMessage(const char* message) 
-{
+bool ClientSocket::SendMessage(const char* message) {
     PRINT("Send message ... ");
-    return send(clientSocket, message, strlen(message), 0) != SOCKET_ERROR;
+
+    float startTime = getCurrentTime();
+
+    if (send(clientSocket, message, strlen(message), 0) == SOCKET_ERROR) {
+        // Gérer l'erreur si nécessaire
+        return false;
+    }
+
+    // Attendre la réception du message de retour
+    char buffer[4024];
+    int bytesRead;
+
+    while (true) {
+        if (getCurrentTime() > startTime + 10) {
+            std::cout << "Err_Connection_Timed_Out :" << std::endl;
+            return false;
+        }
+
+        bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+        if (bytesRead > 0) {
+            std::string receivedData(buffer, bytesRead);
+            std::cout << "Received from server: " << receivedData << std::endl;
+            return true;
+        }
+    }
 }
+
+void ClientSocket::Close()
+{
+    closesocket(clientSocket);
+}
+

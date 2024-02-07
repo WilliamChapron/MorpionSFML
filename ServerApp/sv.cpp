@@ -16,6 +16,13 @@
 
 #include "Time.h"
 
+#include "ServerSocket.h"
+
+#include <iostream>
+#include <fstream>
+
+//
+
 
 //bool turn(Render render, Morpion* morpion, int turnCounter) {
 //    int placeState = morpion->placeSymbol(render);
@@ -32,15 +39,68 @@
 //    return true;
 //}
 
-#include <iostream>
-#include <windows.h>
-#include "ServerSocket.h"
+
+
+
+
+HWND* g_hwnd = nullptr;
+ServerSocket* g_pServer = nullptr;
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
-    case WM_SOCKET:
-        OutputDebugStringA("Un socket detecté");
+    case WM_LISTEN_SOCKET:
+    {
+        while (true) {
+            SOCKET newClientSocket = accept(g_pServer->listenSocket, nullptr, nullptr);
+            if (newClientSocket == INVALID_SOCKET) {
+                // Aucun nouveau client en attente, sortie de la boucle
+                break;
+            }
+
+            printTimestamp();
+            std::cout << "Nouvelle connexion établie." << std::endl;
+            g_pServer->AddClientSocket(newClientSocket, g_hwnd);
+        }
         break;
+    }
+    case WM_CLIENTS_SOCKET:
+    {
+
+        // Récupérer le socket du client à partir de wParam
+        SOCKET clientSocket = static_cast<SOCKET>(wParam);
+
+        // Vérifier s'il y a des données à lire sur le socket
+        char buffer[4024];
+        int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+
+        if (bytesRead > 0) {
+            // Des données ont été lues, traitez-les comme nécessaire
+            std::string receivedData(buffer, bytesRead);
+            printTimestamp();
+            std::cout << "Received data from client : " << receivedData << std::endl;
+
+            // Exemple: Envoyer un message de retour
+            std::string response = "Server successfully received : " + receivedData;
+            send(clientSocket, response.c_str(), response.size(), 0);
+        }
+        else if (bytesRead == 0) {
+            std::cout << "Nothing received from client : " << std::endl;
+            // #TODO Send Failed to client with send
+            // #TODO Handle when client disconnected
+            // #TODO Handle Broadcast to all clients
+            // #NOW bidirectional request, request and response + connection timed out working
+
+        }
+        else {
+            // Erreur de lecture du socket, gestion des erreurs si nécessaire
+            int errorCode = WSAGetLastError();
+            if (errorCode != WSAEWOULDBLOCK) {
+                std::cerr << "Socket error: " << errorCode << std::endl;
+            }
+        }
+        break;
+    }
+
     default:
         return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
@@ -48,15 +108,19 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    AllocConsole(); // Créer une nouvelle console
+    FILE* pCout;
+    freopen_s(&pCout, "CONOUT$", "w", stdout); // Rediriger la sortie standard vers la console
+
     // Créer la fenêtre
     WNDCLASS wc = {};
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
-    wc.lpszClassName = L"ServerWindowClass";
+    wc.lpszClassName = "ServerWindowClass";
 
     RegisterClass(&wc);
 
-    HWND hwnd = CreateWindowEx(
+    HWND hwnd = CreateWindowExW(
         0,
         L"ServerWindowClass",
         L"Server App",
@@ -69,13 +133,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     if (!hwnd)
         return -1;
-    OutputDebugStringA("dsdds");
+
+    g_hwnd = &hwnd; // Affecter l'adresse de hwnd à g_hwnd
 
     ShowWindow(hwnd, SW_SHOW);
 
     // Initialiser et démarrer le serveur
-    ServerSocket server(80);
-    if (!server.StartAsyncListening(hwnd)) {
+    g_pServer = new ServerSocket(80);
+    if (!g_pServer->StartAsyncListening(g_hwnd)) {
         // Gérer l'échec de démarrage du serveur
         return -1;
     }
@@ -85,7 +150,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     while (GetMessage(&msg, 0, 0, 0)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
+
+        // #CAN we can call any function here if we wish in mainLoop
     }
+
+    fclose(pCout); // Fermer la redirection de la sortie standard
+    FreeConsole(); // Fermer la console
 
     return 0;
 }

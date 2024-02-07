@@ -8,7 +8,8 @@ ServerSocket::~ServerSocket() {
     Close();
 }
 
-bool ServerSocket::StartAsyncListening(HWND hwnd) {
+bool ServerSocket::StartAsyncListening(HWND* hwnd) {
+
     // Initialiser Winsock
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -44,7 +45,7 @@ bool ServerSocket::StartAsyncListening(HWND hwnd) {
     }
 
     // Associer le socket à un événement
-    if (WSAAsyncSelect(listenSocket, hwnd, WM_SOCKET, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR) {
+    if (WSAAsyncSelect(listenSocket, (*hwnd), WM_LISTEN_SOCKET, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR) {
         std::cerr << "Failed to start asynchronous listening." << std::endl;
         Close();
         return false;
@@ -60,24 +61,28 @@ bool ServerSocket::StartAsyncListening(HWND hwnd) {
     return true;
 }
 
-void ServerSocket::HandleClients() {
-    // Cette fonction est destinée à être utilisée avec WSAAsyncSelect
-    // Gérer les connexions et les données entrantes de manière asynchrone
-    // Gérer les événements FD_ACCEPT et FD_READ dans la procédure de fenêtre
+void ServerSocket::AddClientSocket(SOCKET clientSocket, HWND* hwnd) {
+    clientSockets.push_back(clientSocket);
 
-    // Vous devez implémenter la logique de cette fonction en fonction de vos besoins
-    // par exemple, traiter les connexions entrantes, lire les données, etc.
+    // Associer le socket client à un événement
+    if (WSAAsyncSelect(clientSocket, (*hwnd), WM_CLIENTS_SOCKET, FD_READ | FD_CLOSE) == SOCKET_ERROR) {
+        int errorCode = WSAGetLastError();
+        std::cout << "Failed to start asynchronous listening for client socket. Error code: " << errorCode << std::endl;
+        // Gérer l'erreur si nécessaire
+    }
 }
 
+
+
 void ServerSocket::BroadcastMessage(const std::string& message) {
-    for (SOCKET clientSocket : clientSockets) {
+    /*for (SOCKET clientSocket : clientSockets) {
         send(clientSocket, message.c_str(), message.size(), 0);
-    }
+    }*/
 }
 
 void ServerSocket::Close() {
-    for (SOCKET clientSocket : clientSockets) {
+    /*for (SOCKET clientSocket : clientSockets) {
         closesocket(clientSocket);
     }
-    WSACleanup();
+    WSACleanup();*/
 }

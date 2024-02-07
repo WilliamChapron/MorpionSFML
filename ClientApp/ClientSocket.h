@@ -14,6 +14,7 @@ public:
 
     bool Connect();
     bool SendMessage(const char* message);
+    void Close();
 
 private:
     SOCKET clientSocket;
