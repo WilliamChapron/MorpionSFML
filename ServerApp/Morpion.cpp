@@ -51,9 +51,6 @@ int Morpion::placeSymbol(Render render) {
     
     PRINT("No Empty")
     return 1;
-
-
-
 }
 
 
