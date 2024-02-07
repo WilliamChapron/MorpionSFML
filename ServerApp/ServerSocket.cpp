@@ -5,7 +5,10 @@ ServerSocket::ServerSocket(int port) : port(port), listenSocket(INVALID_SOCKET) 
 }
 
 ServerSocket::~ServerSocket() {
-    Close();
+    for (SOCKET clientSocket : clientSockets) {
+        closesocket(clientSocket);
+    }
+    WSACleanup();
 }
 
 bool ServerSocket::StartAsyncListening(HWND* hwnd) {
@@ -31,7 +34,7 @@ bool ServerSocket::StartAsyncListening(HWND* hwnd) {
 
     if (inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr) != 1) {
         std::cerr << "Failed to convert IP address." << std::endl;
-        Close();
+        Close(listenSocket);
         return false;
     }
 
@@ -40,21 +43,21 @@ bool ServerSocket::StartAsyncListening(HWND* hwnd) {
     // Lier le socket
     if (bind(listenSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR) {
         std::cerr << "Failed to bind socket." << std::endl;
-        Close();
+        Close(listenSocket);
         return false;
     }
 
     // Associer le socket à un événement
     if (WSAAsyncSelect(listenSocket, (*hwnd), WM_LISTEN_SOCKET, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR) {
         std::cerr << "Failed to start asynchronous listening." << std::endl;
-        Close();
+        Close(listenSocket);
         return false;
     }
 
     // Écouter les connexions entrantes
     if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
         std::cerr << "Failed to listen for incoming connections." << std::endl;
-        Close();
+        Close(listenSocket);
         return false;
     }
 
@@ -64,25 +67,20 @@ bool ServerSocket::StartAsyncListening(HWND* hwnd) {
 void ServerSocket::AddClientSocket(SOCKET clientSocket, HWND* hwnd) {
     clientSockets.push_back(clientSocket);
 
-    // Associer le socket client à un événement
     if (WSAAsyncSelect(clientSocket, (*hwnd), WM_CLIENTS_SOCKET, FD_READ | FD_CLOSE) == SOCKET_ERROR) {
         int errorCode = WSAGetLastError();
         std::cout << "Failed to start asynchronous listening for client socket. Error code: " << errorCode << std::endl;
-        // Gérer l'erreur si nécessaire
     }
 }
 
 
 
 void ServerSocket::BroadcastMessage(const std::string& message) {
-    /*for (SOCKET clientSocket : clientSockets) {
+    for (SOCKET clientSocket : clientSockets) {
         send(clientSocket, message.c_str(), message.size(), 0);
-    }*/
+    }
 }
 
-void ServerSocket::Close() {
-    /*for (SOCKET clientSocket : clientSockets) {
-        closesocket(clientSocket);
-    }
-    WSACleanup();*/
+void ServerSocket::Close(SOCKET clientSocket) {
+    closesocket(clientSocket);
 }

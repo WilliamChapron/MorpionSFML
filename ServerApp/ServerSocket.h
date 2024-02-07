@@ -15,7 +15,7 @@ public:
     bool StartAsyncListening(HWND* hwnd);
     void AddClientSocket(SOCKET clientSocket, HWND* hwnd);
     void BroadcastMessage(const std::string& message);
-    void Close();
+    void Close(SOCKET clientSocket);
     int port;
     SOCKET listenSocket;
     std::vector<SOCKET> clientSockets;

@@ -74,14 +74,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
 
         if (bytesRead > 0) {
-            // Des données ont été lues, traitez-les comme nécessaire
             std::string receivedData(buffer, bytesRead);
             printTimestamp();
             std::cout << "Received data from client : " << receivedData << std::endl;
 
-            // Exemple: Envoyer un message de retour
-            std::string response = "Server successfully received : " + receivedData;
-            send(clientSocket, response.c_str(), response.size(), 0);
+            // Send return message
+            //std::string response = "Server successfully received : " + receivedData;
+            //send(clientSocket, response.c_str(), response.size(), 0);
         }
         else if (bytesRead == 0) {
             std::cout << "Nothing received from client : " << std::endl;
@@ -92,7 +91,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
         }
         else {
-            // Erreur de lecture du socket, gestion des erreurs si nécessaire
             int errorCode = WSAGetLastError();
             if (errorCode != WSAEWOULDBLOCK) {
                 std::cerr << "Socket error: " << errorCode << std::endl;
@@ -110,9 +108,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     AllocConsole(); // Créer une nouvelle console
     FILE* pCout;
-    freopen_s(&pCout, "CONOUT$", "w", stdout); // Rediriger la sortie standard vers la console
+    freopen_s(&pCout, "CONOUT$", "w", stdout); 
 
-    // Créer la fenêtre
+
     WNDCLASS wc = {};
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
@@ -134,28 +132,39 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     if (!hwnd)
         return -1;
 
-    g_hwnd = &hwnd; // Affecter l'adresse de hwnd à g_hwnd
+    g_hwnd = &hwnd; 
 
-    ShowWindow(hwnd, SW_SHOW);
+    ShowWindow(hwnd, SW_HIDE);
 
     // Initialiser et démarrer le serveur
     g_pServer = new ServerSocket(80);
     if (!g_pServer->StartAsyncListening(g_hwnd)) {
-        // Gérer l'échec de démarrage du serveur
-        return -1;
+        return 0;
     }
 
-    // Utiliser une boucle simple pour maintenir l'application active
+
+
+    const char* broadcastMessage = "Salut tout les clients c'est moi";
+    float startTime = getCurrentTime();
+    bool isBroadcasted = false;
+
     MSG msg = {};
-    while (GetMessage(&msg, 0, 0, 0)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-
-        // #CAN we can call any function here if we wish in mainLoop
+    while (true) {
+        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+            // #CAN we can call any function here if we wish in mainLoop
+        }
+        if (getCurrentTime() > startTime + 5 && !isBroadcasted) {
+            PRINT("Broadcast message");
+            g_pServer->BroadcastMessage(broadcastMessage);
+            isBroadcasted = true;
+        }
     }
+    
 
-    fclose(pCout); // Fermer la redirection de la sortie standard
-    FreeConsole(); // Fermer la console
+    fclose(pCout); 
+    FreeConsole(); 
 
     return 0;
 }

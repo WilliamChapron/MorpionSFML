@@ -38,12 +38,12 @@ bool ClientSocket::SendMessage(const char* message) {
     float startTime = getCurrentTime();
 
     if (send(clientSocket, message, strlen(message), 0) == SOCKET_ERROR) {
-        // Gérer l'erreur si nécessaire
         return false;
     }
 
-    // Attendre la réception du message de retour
-    char buffer[4024];
+    return true;
+
+    /*char buffer[4024];
     int bytesRead;
 
     while (true) {
@@ -58,6 +58,27 @@ bool ClientSocket::SendMessage(const char* message) {
             std::cout << "Received from server: " << receivedData << std::endl;
             return true;
         }
+    }*/
+}
+
+void ClientSocket::AwaitBroadcast() {
+    char buffer[4024];
+    int bytesRead;
+
+    while (true) {
+        PRINT("Attente")
+        bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+        PRINT(bytesRead)
+        if (bytesRead >= 0) {
+            PRINT("Pas de lecture")
+            return;
+        }
+        if (bytesRead > 0) {
+            PRINT("Une lecture")
+            std::string receivedData(buffer, bytesRead);
+            std::cout << "Received from server: " << receivedData << std::endl;
+        }
+        
     }
 }
 
