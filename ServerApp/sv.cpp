@@ -84,10 +84,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         }
         else if (bytesRead == 0) {
             std::cout << "Nothing received from client : " << std::endl;
-            // #TODO Send Failed to client with send
-            // #TODO Handle when client disconnected
-            // #TODO Handle Broadcast to all clients
-            // #NOW bidirectional request, request and response + connection timed out working
+            
 
         }
         else {
@@ -259,94 +256,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 //    return 0;
 //}
 
-//#include <iostream>
-//#include <Ws2tcpip.h>  // Ajout de l'en-tête pour inet_pton
-//#include <WinSock2.h>
-// 
-// 
-//
-//#pragma comment(lib, "ws2_32.lib")
-//
-//struct ConnectionData {
-//    WSADATA wsaData;
-//    SOCKET clientSocket;
-//    sockaddr_in serverAddress;
-//    const char* getRequest;
-//};
-//
-//// Init Connexion
-//bool InitializeConnection(ConnectionData& connectionData) {
-//    // Init Winsock
-//    if (WSAStartup(MAKEWORD(2, 2), &connectionData.wsaData) != 0) {
-//        std::cerr << "Erreur lors de l'initialisation de Winsock." << std::endl;
-//        return false;
-//    }
-//
-//    // Init Client Socket
-//    connectionData.clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-//    if (connectionData.clientSocket == INVALID_SOCKET) {
-//        std::cerr << "Erreur lors de la création du socket." << std::endl;
-//        WSACleanup();
-//        return false;
-//    }
-//
-//    // Config Server Address
-//    inet_pton(AF_INET, "172.217.169.78", &(connectionData.serverAddress.sin_addr));
-//    connectionData.serverAddress.sin_family = AF_INET; // IP V4
-//    connectionData.serverAddress.sin_port = htons(80); // Port 80
-//
-//    // Connect Client Socket to server address
-//    if (connect(connectionData.clientSocket, reinterpret_cast<sockaddr*>(&connectionData.serverAddress), sizeof(connectionData.serverAddress)) == SOCKET_ERROR) {
-//        std::cerr << "Erreur lors de la connexion au serveur." << std::endl;
-//        closesocket(connectionData.clientSocket);
-//        WSACleanup();
-//        return false;
-//    }
-//
-//    std::cout << "Connexion établie ..." << std::endl;
-//    return true;
-//}
-//
-//// Send Request
-//bool SendRequest(ConnectionData& connectionData) {
-//    if (send(connectionData.clientSocket, connectionData.getRequest, strlen(connectionData.getRequest), 0) == SOCKET_ERROR) {
-//        std::cerr << "Erreur lors de l'envoi de la requête." << std::endl;
-//        closesocket(connectionData.clientSocket);
-//        WSACleanup();
-//        return false;
-//    }
-//
-//    return true;
-//}
-//
-//
-//void ReceiveAndDisplayResponse(ConnectionData& connectionData) {
-//    char buffer[4096];
-//    int bytesRead;
-//    while ((bytesRead = recv(connectionData.clientSocket, buffer, sizeof(buffer), 0)) > 0) {
-//        std::cout.write(buffer, bytesRead);
-//    }
-//}
-//
-//
-//void CloseConnection(ConnectionData& connectionData) {
-//    closesocket(connectionData.clientSocket);
-//    WSACleanup();
-//}
-//
-//int main() {
-//    ConnectionData connectionData;
-//    connectionData.getRequest = "GET / HTTP/1.1\r\nHost: www.google.com\r\nConnection: close\r\n\r\n";
-//
-//    if (InitializeConnection(connectionData)) {
-//        if (SendRequest(connectionData)) {
-//            ReceiveAndDisplayResponse(connectionData);
-//        }
-//        CloseConnection(connectionData);
-//    }
-//
-//    while (1) {
-//    }
-//
-//    return 0;
-//}
+
+
+
+// #TODO Send Failed to client with send
+            // #TODO Handle when client disconnected
+            // #TODO Handle Broadcast to all clients
+            // #NOW bidirectional request, request and response + connection timed out working

@@ -12,6 +12,10 @@
 
 
 
+
+
+
+
 int main() {
     ClientSocket client("127.0.0.1", 80);
     client.Connect();
