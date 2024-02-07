@@ -19,17 +19,30 @@ struct Player {
     int score;
 };
 
-struct Render;
-struct Player;
+namespace sf {
+    class RenderWindow;
+    class Event;
+}
 
-class Morpion {
+
+
+struct Render {
+    sf::RenderWindow* pWindow;
+    sf::Event* pEvent;
+    int iWidth;
+    int iHeight;
+    // Update SFML Render
+};
+
+
+class Board {
 private:
     std::array<Symbol, 9> board;
 
 
 
 public:
-    Morpion();
+    Board();
 
     Player* currentPlayer = nullptr;
 
@@ -38,13 +51,6 @@ public:
     void displayBoard() const; // Draw Grid
     void drawBoard(Render render) const;
 
-    bool checkHorizontalWin(Symbol playerSymbol) const;
+    
 
-    bool checkVerticalWin(Symbol playerSymbol) const;
-
-    bool checkDiagonalWin(Symbol playerSymbol) const;
-
-    bool checkBoardFull() const;
-
-    bool checkEnd(Symbol playerSymbol) const;
 };
