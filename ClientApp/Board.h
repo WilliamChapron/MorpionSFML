@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include <iostream>
 #include <array>
 
@@ -9,8 +10,28 @@ enum class Symbol {
     O
 };
 
-struct Render;
-struct Player;
+namespace sf {
+    class RenderWindow;
+    class Event;
+}
+
+
+
+struct Render {
+    sf::RenderWindow* pWindow;
+    sf::Event* pEvent;
+    int iWidth;
+    int iHeight;
+    // Update SFML Render
+};
+
+
+struct Player {
+    std::string name;
+    Symbol symbol;
+    int score;
+};
+
 
 class Morpion {
 private:
@@ -38,3 +59,6 @@ public:
 
     bool checkEnd(Symbol playerSymbol) const;
 };
+
+int updateInput(Render render);
+
