@@ -64,14 +64,14 @@ bool ServerSocket::StartAsyncListening(HWND* hwnd) {
     // Associer le socket � un �v�nement
     if (WSAAsyncSelect(listenSocket, (*hwnd), WM_LISTEN_SOCKET, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR) {
         std::cerr << "Failed to start asynchronous listening." << std::endl;
-        Close();
+        Close(listenSocket);
         return false;
     }
 
     // �couter les connexions entrantes
     if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
         std::cerr << "Failed to listen for incoming connections." << std::endl;
-        Close();
+        closesocket(listenSocket);
         return false;
     }
 

@@ -12,7 +12,7 @@
 #include "ServerSocket.h"
 #include "Defines.h"
 #include "GameManager.h"
-#include "SetPlayers.h"
+//#include "SetPlayers.h"
 #include "Morpion.h"
 
 #include "Time.h"

@@ -37,19 +37,23 @@ inline json CreateJsonTable(const std::string& messageType, const std::vector<Sy
 }
 
 
-json ReceiveJsonFromSocket(SOCKET socket) {
+inline json ReceiveJsonFromSocket(SOCKET socket) {
     char buffer[4096];
     int bytesRead;
     std::string receivedData;
 
-   // while (true) {
-        bytesRead = recv(socket, buffer, sizeof(buffer), 0);
+    bytesRead = recv(socket, buffer, sizeof(buffer), 0);
 
-        if (bytesRead <= 0) {
-            return json::object();
-        }
-
+    if (bytesRead == -1) {
+        return json::object();
+    }
+    else if (bytesRead <= 0) {
+        // Aucune donnée reçue ou déconnexion du client
+        return json::object();
+    }
+    else {
+        // Données reçues avec succès
         receivedData += std::string(buffer, bytesRead);
         return json::parse(receivedData);
-    //}
+    }
 }

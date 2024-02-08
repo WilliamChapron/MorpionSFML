@@ -20,6 +20,10 @@ ClientSocket::ClientSocket(const char* serverIp, int serverPort)
         WSACleanup();
     }
     serverAddress.sin_port = htons(serverPort);
+
+    // Configuration du socket en mode non bloquant
+    u_long mode = 1;
+    ioctlsocket(clientSocket, FIONBIO, &mode);
 }
 
 ClientSocket::~ClientSocket()
@@ -64,11 +68,14 @@ bool ClientSocket::SendMessage(const json& jsonObject) {
 }
 
 void ClientSocket::AwaitBroadcast() {
+    //PRINT("On await");
     json receivedJson = ReceiveJsonFromSocket(clientSocket);
 
     if (!receivedJson.empty()) {
         std::cout << "Received from server: " << receivedJson.dump() << std::endl;
+        return;
     }
+    return;
 }
 
 
