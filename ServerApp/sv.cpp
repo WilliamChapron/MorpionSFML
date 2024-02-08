@@ -5,24 +5,6 @@
 //#include "Player.h"
 //#include "Defines.h"
 
-
-
-#include "Includes.h"
-#include "ServerSocket.h"
-#include "Defines.h"
-#include "GameManager.h"
-#include "SetPlayers.h"
-#include "Morpion.h"
-
-#include "Time.h"
-
-#include "ServerSocket.h"
-
-#include <iostream>
-#include <fstream>
-
-
-
 //bool turn(Render render, Morpion* morpion, int turnCounter) {
 //    int placeState = morpion->placeSymbol(render);
 //    if (placeState == 1) {
@@ -38,6 +20,20 @@
 //    return true;
 //}
 
+
+#include "Includes.h"
+#include "ServerSocket.h"
+#include "Defines.h"
+#include "GameManager.h"
+#include "SetPlayers.h"
+#include "Morpion.h"
+
+#include "Time.h"
+
+#include "ServerSocket.h"
+
+#include <iostream>
+#include <fstream>
 
 
 Morpion morpion;
@@ -72,10 +68,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_CLIENTS_SOCKET:
     {
 
-        // Récupérer le socket du client à partir de wParam
         SOCKET clientSocket = static_cast<SOCKET>(wParam);
 
-        // Vérifier s'il y a des données à lire sur le socket
         char buffer[4024];
         int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
 
@@ -94,6 +88,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             for (auto& client : g_pServer->clientSockets) {
                 send(client, gameState.c_str(), gameState.size(), 0);
             }
+
+            // Vérifier si le message est un clic de souris
+            if (receivedData.substr(0, 5) == "Click") {
+
+            }
+
+
         }
         else if (bytesRead == 0) {
             std::cout << "Nothing received from client : " << std::endl;
@@ -128,7 +129,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     WNDCLASS wc = {};
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
-    wc.lpszClassName = "ServerWindowClass";
+    wc.lpszClassName = L"ServerWindowClass";
 
     RegisterClass(&wc);
 
@@ -172,7 +173,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return 0;
 }
 
-
+//
 ////MORPION BASIC
 //int main(int argc, char** argv)
 //{
@@ -198,41 +199,41 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 //
 //
 //
-//    ////Création d'une fenêtre
-//    //Render myRenderer{new sf::RenderWindow(sf::VideoMode(640, 480), "SFML"), new sf::Event, 640, 480};
-//    //Morpion* myMorpion;
-//    //myMorpion = new Morpion;
-//
-//    //Player* player1 = nullptr;
-//    //player1 = new Player{ "William", Symbol::X, 0};
-//
-//    //Player* player2 = nullptr;
-//    //player2 = new Player{ "Bot", Symbol::O, 0 };
-//
-//
-//    ////GameLoop
-//    //myMorpion->drawBoard(myRenderer);
-//    //myMorpion->currentPlayer = player1;
-//    //int turnCounter = 0;
-//    //while (myRenderer.pWindow->isOpen())
-//    //{
-//
-//    //    
-//
-//
-//    //    //EVENT
-//    //    int inputState = updateInput(myRenderer);
-//    //    //PRINT(myMorpion.currentPlayer->name)
-//    //    if (inputState == 0) {
-//    //        //PRINT("Pas d'Input")
-//    //        continue;
-//    //    }
-//    //    else if(inputState == 1) {
-//    //        if (!turn(myRenderer, myMorpion, turnCounter))
-//    //        {
-//    //            continue;
-//    //        };
-//    //    }
+    ////Création d'une fenêtre
+    //Render myRenderer{new sf::RenderWindow(sf::VideoMode(640, 480), "SFML"), new sf::Event, 640, 480};
+    //Morpion* myMorpion;
+    //myMorpion = new Morpion;
+
+    //Player* player1 = nullptr;
+    //player1 = new Player{ "William", Symbol::X, 0};
+
+    //Player* player2 = nullptr;
+    //player2 = new Player{ "Bot", Symbol::O, 0 };
+
+
+    ////GameLoop
+    //myMorpion->drawBoard(myRenderer);
+    //myMorpion->currentPlayer = player1;
+    //int turnCounter = 0;
+    //while (myRenderer.pWindow->isOpen())
+    //{
+
+    //    
+
+
+    //    //EVENT
+    //    int inputState = updateInput(myRenderer);
+    //    //PRINT(myMorpion.currentPlayer->name)
+    //    if (inputState == 0) {
+    //        //PRINT("Pas d'Input")
+    //        continue;
+    //    }
+    //    else if(inputState == 1) {
+    //        if (!turn(myRenderer, myMorpion, turnCounter))
+    //        {
+    //            continue;
+    //        };
+    //    }
 //
 //
 //
@@ -241,23 +242,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 //
 //
 //
-//    //    //PRINT("Action")
-//
-//    //    //UPDATE
-//
-//    //    //DRAW
-//    //    if (myMorpion->checkEnd(Symbol::X) || myMorpion->checkEnd(Symbol::O)) {
-//    //        PRINT("Partie terminé, joueur gagnant :")
-//    //        PRINT(myMorpion->currentPlayer->name);
-//    //        //break;
-//    //    }
-//
-//    //    // Transition next it
-//    //    myMorpion->currentPlayer = (turnCounter % 2 == 0) ? player2 : player1;
-//    //    turnCounter++;
-//
-//
-//    //}
-//
-//    return 0;
+    //    //PRINT("Action")
+
+    //    //UPDATE
+
+    //    //DRAW
+    //    if (myMorpion->checkEnd(Symbol::X) || myMorpion->checkEnd(Symbol::O)) {
+    //        PRINT("Partie terminé, joueur gagnant :")
+    //        PRINT(myMorpion->currentPlayer->name);
+    //        //break;
+    //    }
+
+    //    // Transition next it
+    //    myMorpion->currentPlayer = (turnCounter % 2 == 0) ? player2 : player1;
+    //    turnCounter++;
+
+
+    //}
+
+//   return 0;
 //}

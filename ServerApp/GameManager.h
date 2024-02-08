@@ -1,5 +1,4 @@
-#ifndef GAME_MANAGER_H
-#define GAME_MANAGER_H
+#pragma once
 
 #include "Morpion.h"
 #include "Player.h"
@@ -23,5 +22,3 @@ private:
     Player* currentPlayer;
 
 };
-
-#endif
