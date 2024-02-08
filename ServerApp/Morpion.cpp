@@ -17,7 +17,7 @@ int Morpion::placeSymbol(Render render) {
     sf::Vector2i mousePosition = getMousePosition(render); // Obtenez la position de la souris
 
     int iCol = 3;
- 
+
 
     const float cellWidth = CALCULATE_CELL_SIZE(render.iWidth, iCol, 5);
     const float cellHeight = CALCULATE_CELL_SIZE(render.iHeight, iCol, 5);
@@ -45,12 +45,12 @@ int Morpion::placeSymbol(Render render) {
 
     if (board[globalIndex] == Symbol::Empty) {
         PRINT("Empty")
-        board[globalIndex] = currentPlayer->symbol;
+            board[globalIndex] = currentPlayer->symbol;
         return 0;
     }
-    
+
     PRINT("No Empty")
-    return 1;
+        return 1;
 
 
 
@@ -171,3 +171,20 @@ void Morpion::drawBoard(Render render) const {
 }
 
 
+std::string Morpion::getBoardState() const {
+    std::string state;
+    for (const auto& symbol : board) {
+        switch (symbol) {
+        case Symbol::X:
+            state += "X";
+            break;
+        case Symbol::O:
+            state += "O";
+            break;
+        case Symbol::Empty:
+            state += "-";
+            break;
+        }
+    }
+    return state;
+}

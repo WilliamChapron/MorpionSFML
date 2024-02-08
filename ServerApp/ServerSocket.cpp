@@ -20,7 +20,7 @@ bool ServerSocket::StartAsyncListening(HWND* hwnd) {
         return false;
     }
 
-    // Créer le socket
+    // Crï¿½er le socket
     listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (listenSocket == INVALID_SOCKET) {
         std::cerr << "Failed to create socket." << std::endl;
@@ -47,17 +47,31 @@ bool ServerSocket::StartAsyncListening(HWND* hwnd) {
         return false;
     }
 
-    // Associer le socket à un événement
+    // Associer le socket ï¿½ un ï¿½vï¿½nement
     if (WSAAsyncSelect(listenSocket, (*hwnd), WM_LISTEN_SOCKET, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR) {
         std::cerr << "Failed to start asynchronous listening." << std::endl;
         Close(listenSocket);
         return false;
     }
 
-    // Écouter les connexions entrantes
+    // ï¿½couter les connexions entrantes
     if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
         std::cerr << "Failed to listen for incoming connections." << std::endl;
         Close(listenSocket);
+        return false;
+    }
+
+    // Associer le socket ï¿½ un ï¿½vï¿½nement
+    if (WSAAsyncSelect(listenSocket, (*hwnd), WM_LISTEN_SOCKET, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR) {
+        std::cerr << "Failed to start asynchronous listening." << std::endl;
+        Close();
+        return false;
+    }
+
+    // ï¿½couter les connexions entrantes
+    if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
+        std::cerr << "Failed to listen for incoming connections." << std::endl;
+        Close();
         return false;
     }
 

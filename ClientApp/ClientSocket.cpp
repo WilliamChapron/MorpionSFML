@@ -4,11 +4,12 @@
 #include "JSON.h"
 
 
-ClientSocket::ClientSocket(const char* serverIp, int serverPort) 
+
+ClientSocket::ClientSocket(const char* serverIp, int serverPort)
 {
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-    // Création du socket client
+    // Crï¿½ation du socket client
     clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     // Configuration de l'adresse et du port du serveur
@@ -21,13 +22,13 @@ ClientSocket::ClientSocket(const char* serverIp, int serverPort)
     serverAddress.sin_port = htons(serverPort);
 }
 
-ClientSocket::~ClientSocket() 
+ClientSocket::~ClientSocket()
 {
     closesocket(clientSocket);
     WSACleanup();
 }
 
-bool ClientSocket::Connect() 
+bool ClientSocket::Connect()
 {
     PRINT("Connexion ... ");
     return connect(clientSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) != SOCKET_ERROR;

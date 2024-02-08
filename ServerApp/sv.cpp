@@ -6,13 +6,14 @@
 //#include "Player.h"
 //#include "Defines.h"
 
-//
 
 
 #include "Includes.h"
 #include "ServerSocket.h"
 #include "Defines.h"
-
+#include "GameManager.h"
+#include "SetPlayers.h"
+#include "Morpion.h"
 
 #include "Time.h"
 
@@ -155,7 +156,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     return 0;
 }
-
 
 
 //int main(int argc, char** argv)

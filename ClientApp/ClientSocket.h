@@ -5,7 +5,7 @@
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
-class ClientSocket 
+class ClientSocket
 {
 public:
     ClientSocket(const char* serverIp, int serverPort);
@@ -19,5 +19,5 @@ public:
 private:
     SOCKET clientSocket;
     sockaddr_in serverAddress;
-    WSADATA wsaData;  
+    WSADATA wsaData;
 };

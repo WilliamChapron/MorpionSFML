@@ -1,4 +1,4 @@
-#include <Ws2tcpip.h>  // Ajout de l'en-tête pour inet_pton
++#include <Ws2tcpip.h>  // Ajout de l'en-tête pour inet_pton
 #include <iostream>
 #include <Winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
@@ -17,6 +17,7 @@
 
 
 int main() {
+    // Première connexion
     ClientSocket client("127.0.0.1", 80);
     client.Connect();
     std::this_thread::sleep_for(std::chrono::seconds(1));

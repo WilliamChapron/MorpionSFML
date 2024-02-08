@@ -26,7 +26,7 @@ public:
 
     int placeSymbol(Render render);
 
-    void displayBoard() const; // Draw Grid
+    void displayBoard() const;
     void drawBoard(Render render) const;
 
     bool checkHorizontalWin(Symbol playerSymbol) const;
@@ -38,4 +38,6 @@ public:
     bool checkBoardFull() const;
 
     bool checkEnd(Symbol playerSymbol) const;
+
+    std::string getBoardState() const;
 };
