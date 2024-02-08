@@ -5,34 +5,51 @@
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
+enum class Symbol;
 
+inline void PrintJson(const json& jsonObject) {
+    std::cout << jsonObject.dump() << std::endl;
+}
 
-inline json CreateJson(const std::string& messageType, const std::string& messageContent) {
+inline json CreateJsonMessage(const std::string& messageType, const std::string& messageContent) {
     json message;
 
+
+    // Send message
     message["type"] = messageType;
     message["content"] = messageContent;
     message["timestamp"] = getCurrentTime();
+
+
+    return message;
+}
+
+inline json CreateJsonTable(const std::string& messageType, const std::vector<Symbol>& dataArray) {
+    json message;
+
+    // Send array 
+    message["type"] = messageType;
+    message["data"] = dataArray;
+    message["timestamp"] = getCurrentTime();
+
 
     return message;
 }
 
 
-inline std::string ReceiveDataJsonFromSocket(SOCKET socket) {
-    std::string receivedData;
-    char buffer[4024];
+json ReceiveJsonFromSocket(SOCKET socket) {
+    char buffer[4096];
     int bytesRead;
+    std::string receivedData;
 
-    while (true) {
-        bytesRead = recv(socket, buffer, sizeof(buffer), 0);
+    // while (true) {
+    bytesRead = recv(socket, buffer, sizeof(buffer), 0);
 
-        if (bytesRead == 0) {
-            return "null";
-        }
-        if (bytesRead > 0) {
-            receivedData += std::string(buffer, bytesRead);
-        }
+    if (bytesRead <= 0) {
+        return json::object();
     }
 
-    return receivedData;
+    receivedData += std::string(buffer, bytesRead);
+    return json::parse(receivedData);
+    //}
 }

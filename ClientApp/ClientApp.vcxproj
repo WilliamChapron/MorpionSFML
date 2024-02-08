@@ -134,6 +134,7 @@
   <ItemGroup>
     <ClInclude Include="ClientSocket.h" />
     <ClInclude Include="Defines.h" />
+    <ClInclude Include="Includes.h" />
     <ClInclude Include="JSON.h" />
   </ItemGroup>
   <ItemGroup>

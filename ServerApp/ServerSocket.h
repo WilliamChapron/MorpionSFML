@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 
 class ServerSocket {
@@ -14,7 +16,7 @@ public:
 
     bool StartAsyncListening(HWND* hwnd);
     void AddClientSocket(SOCKET clientSocket, HWND* hwnd);
-    void BroadcastMessage(const std::string& message);
+    void BroadcastMessage(const json& jsonData);
     void Close(SOCKET clientSocket);
     int port;
     SOCKET listenSocket;

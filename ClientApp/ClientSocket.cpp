@@ -1,6 +1,7 @@
 #include "ClientSocket.h"
 #include "Defines.h"
 #include "Time.h"
+#include "JSON.h"
 
 
 ClientSocket::ClientSocket(const char* serverIp, int serverPort) 
@@ -32,12 +33,12 @@ bool ClientSocket::Connect()
     return connect(clientSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) != SOCKET_ERROR;
 }
 
-bool ClientSocket::SendMessage(const char* message) {
-    PRINT("Send message ... ");
+bool ClientSocket::SendMessage(const json& jsonObject) {
+    std::string message = jsonObject.dump();
 
     float startTime = getCurrentTime();
 
-    if (send(clientSocket, message, strlen(message), 0) == SOCKET_ERROR) {
+    if (send(clientSocket, message.c_str(), message.size(), 0) == SOCKET_ERROR) {
         return false;
     }
 
@@ -62,25 +63,14 @@ bool ClientSocket::SendMessage(const char* message) {
 }
 
 void ClientSocket::AwaitBroadcast() {
-    char buffer[4024];
-    int bytesRead;
+    json receivedJson = ReceiveJsonFromSocket(clientSocket);
 
-    while (true) {
-        PRINT("Attente")
-        bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-        PRINT(bytesRead)
-        if (bytesRead >= 0) {
-            PRINT("Pas de lecture")
-            return;
-        }
-        if (bytesRead > 0) {
-            PRINT("Une lecture")
-            std::string receivedData(buffer, bytesRead);
-            std::cout << "Received from server: " << receivedData << std::endl;
-        }
-        
+    if (!receivedJson.empty()) {
+        std::cout << "Received from server: " << receivedJson.dump() << std::endl;
     }
 }
+
+
 
 void ClientSocket::Close()
 {

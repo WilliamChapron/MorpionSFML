@@ -75,9 +75,11 @@ void ServerSocket::AddClientSocket(SOCKET clientSocket, HWND* hwnd) {
 
 
 
-void ServerSocket::BroadcastMessage(const std::string& message) {
+void ServerSocket::BroadcastMessage(const json& jsonData) {
+    std::string jsonString = jsonData.dump(); // Json to string with nlohmann
+
     for (SOCKET clientSocket : clientSockets) {
-        send(clientSocket, message.c_str(), message.size(), 0);
+        send(clientSocket, jsonString.c_str(), jsonString.size(), 0);
     }
 }
 

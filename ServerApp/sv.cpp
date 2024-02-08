@@ -2,7 +2,7 @@
 //#include <SFML/Graphics.hpp>
 //#include "Render.h"
 //#include "Input.h"
-//#include "Morpion.h"
+#include "Morpion.h"
 //#include "Player.h"
 //#include "Defines.h"
 
@@ -40,7 +40,9 @@
 //}
 
 
-
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+#include "JSON.h";
 
 
 HWND* g_hwnd = nullptr;
@@ -66,33 +68,15 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_CLIENTS_SOCKET:
     {
 
-        // Récupérer le socket du client à partir de wParam
+
         SOCKET clientSocket = static_cast<SOCKET>(wParam);
 
-        // Vérifier s'il y a des données à lire sur le socket
-        char buffer[4024];
-        int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+        json receivedJson = ReceiveJsonFromSocket(clientSocket);
 
-        if (bytesRead > 0) {
-            std::string receivedData(buffer, bytesRead);
-            printTimestamp();
-            std::cout << "Received data from client : " << receivedData << std::endl;
-
-            // Send return message
-            //std::string response = "Server successfully received : " + receivedData;
-            //send(clientSocket, response.c_str(), response.size(), 0);
+        if (!receivedJson.empty()) {
+            std::cout << "Received from server: " << receivedJson.dump() << std::endl;
         }
-        else if (bytesRead == 0) {
-            std::cout << "Nothing received from client : " << std::endl;
-            
-
-        }
-        else {
-            int errorCode = WSAGetLastError();
-            if (errorCode != WSAEWOULDBLOCK) {
-                std::cerr << "Socket error: " << errorCode << std::endl;
-            }
-        }
+        
         break;
     }
 
@@ -141,12 +125,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 
 
-    const char* broadcastMessage = "Salut tout les clients c'est moi";
+    std::vector<Symbol> table = { Symbol::X, Symbol::O, Symbol::Empty};
+    json array = CreateJsonTable("Message", table);
+    json message = CreateJsonMessage("Message", "Hello");
+
     float startTime = getCurrentTime();
     bool isBroadcasted = false;
 
     MSG msg = {};
     while (true) {
+        //test json
+
+        //test json
         while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
@@ -154,7 +144,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         }
         if (getCurrentTime() > startTime + 5 && !isBroadcasted) {
             PRINT("Broadcast message");
-            g_pServer->BroadcastMessage(broadcastMessage);
+            g_pServer->BroadcastMessage(array);
             isBroadcasted = true;
         }
     }
