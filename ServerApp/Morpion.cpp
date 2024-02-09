@@ -13,14 +13,13 @@ Morpion::Morpion() {
     }
 }
 
-int Morpion::placeSymbol(Render render) {
-    sf::Vector2i mousePosition = getMousePosition(render); // Obtenez la position de la souris
+int Morpion::placeSymbol(sf::Vector2i mousePosition, int width, int height) {
 
     int iCol = 3;
 
 
-    const float cellWidth = CALCULATE_CELL_SIZE(render.iWidth, iCol, 5);
-    const float cellHeight = CALCULATE_CELL_SIZE(render.iHeight, iCol, 5);
+    const float cellWidth = CALCULATE_CELL_SIZE(width, iCol, 5);
+    const float cellHeight = CALCULATE_CELL_SIZE(height, iCol, 5);
 
 
     int indexX = CALCULATE_MOUSE_TO_INDEX(mousePosition.x, 5, cellWidth);
@@ -32,16 +31,18 @@ int Morpion::placeSymbol(Render render) {
     for (const auto& element : board) {
         switch (element) {
         case Symbol::X:
-            std::cout << "X" << std::endl;  // Affiche un texte pour le symbole X
+            std::cout << "X" << std::endl;  
             break;
         case Symbol::O:
-            std::cout << "O" << std::endl;  // Affiche un texte pour le symbole O
+            std::cout << "O" << std::endl; 
             break;
-            // Ajoutez d'autres cas au besoin pour chaque symbole
         case Symbol::Empty:
-            std::cout << "Autre" << std::endl;  // Cas par défaut si le symbole n'est pas X ou O
+            std::cout << "Autre" << std::endl;  
         }
     }
+
+    PRINT("globalIndex");
+    PRINT(globalIndex);
 
     if (board[globalIndex] == Symbol::Empty) {
         PRINT("Empty")

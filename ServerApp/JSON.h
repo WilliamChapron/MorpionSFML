@@ -24,7 +24,7 @@ inline json CreateJsonMessage(const std::string& messageType, const std::string&
     return message;
 }
 
-inline json CreateJsonTable(const std::string& messageType, const std::vector<Symbol>& dataArray) {
+inline json CreateJsonTable(const std::string& messageType, const std::array<Symbol, 9>& dataArray) {
     json message;
 
     // Send array 

@@ -67,15 +67,15 @@ bool ClientSocket::SendMessage(const json& jsonObject) {
     }*/
 }
 
-void ClientSocket::AwaitBroadcast() {
+json ClientSocket::AwaitBroadcast() {
     //PRINT("On await");
     json receivedJson = ReceiveJsonFromSocket(clientSocket);
 
     if (!receivedJson.empty()) {
-        std::cout << "Received from server: " << receivedJson.dump() << std::endl;
-        return;
+        //std::cout << "Received from server: " << receivedJson.dump() << std::endl;
+        return receivedJson;
     }
-    return;
+    return receivedJson;
 }
 
 

@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include "Includes.h"
 #include <iostream>
 #include <array>
 
@@ -15,7 +16,7 @@ struct Player;
 
 class Morpion {
 private:
-    std::array<Symbol, 9> board;
+
 
 
 
@@ -24,7 +25,9 @@ public:
 
     Player* currentPlayer = nullptr;
 
-    int placeSymbol(Render render);
+    std::array<Symbol, 9> board;
+
+    int placeSymbol(sf::Vector2i mousePosition, int width, int height);
 
     void displayBoard() const;
     void drawBoard(Render render) const;

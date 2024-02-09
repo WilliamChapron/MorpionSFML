@@ -13,7 +13,7 @@ public:
 
     bool Connect();
     bool SendMessage(const json& jsonObject);
-    void AwaitBroadcast();
+    json AwaitBroadcast();
     void Close();
 
 private:
