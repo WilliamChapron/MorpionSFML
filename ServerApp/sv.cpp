@@ -2,7 +2,7 @@
 
 #include "Morpion.h"
 
-
+#include "App.h"
 
 #include "Includes.h"
 #include "ServerSocket.h"
@@ -33,27 +33,11 @@ Player* player1 = nullptr;
 Player* player2 = nullptr;
 int playerNumber = 0;
 
-//void handlePlayerAction(Player* player, Render render) {
-//    if (player == currentPlayer) {
-//        int placeState = morpion.placeSymbol(render);
-//        if (placeState == 0) {
-//            currentPlayer = (currentPlayer == player1) ? player2 : player1; // switch joueur après chaque coup
-//            // Maintenant, vous pouvez envoyer les mises à jour de l'état du jeu aux clients ici
-//        }
-//    }
-//}
-//
-//
 
 
 bool turn(sf::Vector2i mousePosition, int turnIndex, SOCKET inputSocket) {
-    //PRINT(player1);
-    //PRINT(player2);
-
-
     // check is good player turn
     if (!g_pServer->isSocketAtIndex(inputSocket, turnIndex)) {
-        //PRINT("It's not player turn");
         return false;
     }
     else {
@@ -63,7 +47,6 @@ bool turn(sf::Vector2i mousePosition, int turnIndex, SOCKET inputSocket) {
             return false;
         }
         // Increment turn and change current player
-        //PRINT("It's good player turn");
         g_myMorpion->currentPlayer = (g_turnCounter % 2 == 0) ? player2 : player1;
         g_turnCounter++;
 
@@ -71,23 +54,6 @@ bool turn(sf::Vector2i mousePosition, int turnIndex, SOCKET inputSocket) {
         json boardJson = CreateJsonTable("Message", g_myMorpion->board);
         g_pServer->BroadcastMessage(boardJson);
     }
-
-
-    //PRINT("Joueur actuel");
-    //if (turnIndex == 0) {
-    //    PRINT("C'est le player 1 ");
-    //}
-    //if (turnIndex == 1) {
-    //    PRINT("C'est le player 2 ");
-    //}
-
-
-    //std::cout << "Tour " << g_turnCounter << ": ";
-    //std::cout << "Joueur actuel : " << g_myMorpion->currentPlayer->name << ", Symbole : " << static_cast<char>(g_myMorpion->currentPlayer->symbol) << std::endl;
-
-
-
-    // Draw
 
 
     return true;
@@ -179,73 +145,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-    AllocConsole(); // Créer une nouvelle console
-    FILE* pCout;
-    freopen_s(&pCout, "CONOUT$", "w", stdout); 
+    App serverApp();
 
-
-    WNDCLASS wc = {};
-    wc.lpfnWndProc = WindowProc;
-    wc.hInstance = hInstance;
-    wc.lpszClassName = "ServerWindowClass";
-
-    RegisterClass(&wc);
-
-    HWND hwnd = CreateWindowExW(
-        0,
-        L"ServerWindowClass",
-        L"Server App",
-        WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, 800, 600,
-        0,
-        0,
-        hInstance,
-        0);
-
-    if (!hwnd)
+    if (!serverApp.Init(hInstance)) {
         return -1;
-
-    g_hwnd = &hwnd; 
-
-    ShowWindow(hwnd, SW_HIDE);
-
-    // Initialiser et démarrer le serveur
-    g_pServer = new ServerSocket(80);
-    if (!g_pServer->StartAsyncListening(g_hwnd)) {
-        return 0;
     }
 
-    g_myMorpion = new Morpion();
-
-
-
-    //std::vector<Symbol> table = { Symbol::X, Symbol::O, Symbol::Empty};
-    //json array = CreateJsonTable("Message", table);
-    //json message = CreateJsonMessage("Message", "Hello");
-
-    float startTime = getCurrentTime();
-    bool isBroadcasted = false;
-
-    MSG msg = {};
-    while (true) {
-        //test json
-
-        //test json
-        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-            // #CAN we can call any function here if we wish in mainLoop
-        }
-        //if (getCurrentTime() > startTime + 5 && !isBroadcasted) {
-        //    PRINT("Broadcast message");
-        //    g_pServer->BroadcastMessage(array);
-        //    isBroadcasted = true;
-        //}
-    }
-    
-
-    fclose(pCout); 
-    FreeConsole(); 
+    serverApp.Run();
 
     return 0;
 }
