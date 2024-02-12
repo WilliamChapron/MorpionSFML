@@ -1,5 +1,5 @@
 
-#include <SFML/Graphics.hpp>
+#include "Includes.h"
 #include <iostream>
 #include "Defines.h"
 #include "Render.h"

@@ -1,23 +1,26 @@
 #include "ServerSocket.h"
-#include "Defines.h"
+#include <iostream>
 
-ServerSocket::ServerSocket(int port) : port(port), listenSocket(INVALID_SOCKET) 
-{
+ServerSocket::ServerSocket(int port) : port(port), listenSocket(INVALID_SOCKET) {
 }
 
 ServerSocket::~ServerSocket() {
-    Close();
+    for (SOCKET clientSocket : clientSockets) {
+        closesocket(clientSocket);
+    }
+    WSACleanup();
 }
 
-bool ServerSocket::StartListening() {
-    // Initialize Winsock
+bool ServerSocket::StartAsyncListening(HWND* hwnd) {
+
+    // Initialiser Winsock
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         std::cerr << "Failed to initialize Winsock." << std::endl;
         return false;
     }
 
-    // Create socket
+    // Crï¿½er le socket
     listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (listenSocket == INVALID_SOCKET) {
         std::cerr << "Failed to create socket." << std::endl;
@@ -25,82 +28,75 @@ bool ServerSocket::StartListening() {
         return false;
     }
 
-    // Configure server address
+    // Configurer l'adresse du serveur
     sockaddr_in serverAddress;
     serverAddress.sin_family = AF_INET;
-    serverAddress.sin_addr.s_addr = INADDR_ANY;
+
+    if (inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr) != 1) {
+        std::cerr << "Failed to convert IP address." << std::endl;
+        Close(listenSocket);
+        return false;
+    }
+
     serverAddress.sin_port = htons(port);
 
-    // Bind the socket
+    // Lier le socket
     if (bind(listenSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR) {
         std::cerr << "Failed to bind socket." << std::endl;
-        Close();
+        Close(listenSocket);
+        return false;
+    }
+
+    // Associer le socket ï¿½ un ï¿½vï¿½nement
+    if (WSAAsyncSelect(listenSocket, (*hwnd), WM_LISTEN_SOCKET, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR) {
+        std::cerr << "Failed to start asynchronous listening." << std::endl;
+        Close(listenSocket);
+        return false;
+    }
+
+    // ï¿½couter les connexions entrantes
+    if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
+        std::cerr << "Failed to listen for incoming connections." << std::endl;
+        Close(listenSocket);
+        return false;
+    }
+
+    // Associer le socket ï¿½ un ï¿½vï¿½nement
+    if (WSAAsyncSelect(listenSocket, (*hwnd), WM_LISTEN_SOCKET, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR) {
+        std::cerr << "Failed to start asynchronous listening." << std::endl;
+        Close(listenSocket);
+        return false;
+    }
+
+    // ï¿½couter les connexions entrantes
+    if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
+        std::cerr << "Failed to listen for incoming connections." << std::endl;
+        closesocket(listenSocket);
         return false;
     }
 
     return true;
 }
 
-SOCKET ServerSocket::AcceptConnection() {
-    // Listen for incoming connections
-    if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
-        std::cerr << "Failed to listen for incoming connections." << std::endl;
-        Close();
-        return INVALID_SOCKET;
-    }
+void ServerSocket::AddClientSocket(SOCKET clientSocket, HWND* hwnd) {
+    clientSockets.push_back(clientSocket);
 
-    // Accept the connection
-    SOCKET clientSocket = accept(listenSocket, nullptr, nullptr);
-    if (clientSocket == INVALID_SOCKET) {
-        std::cerr << "Failed to accept connection." << std::endl;
-        Close();
-        return INVALID_SOCKET;
-    }
-
-    return clientSocket;
-}
-
-void ServerSocket::HandleClients() {
-    while (true) {
-        SOCKET clientSocket = AcceptConnection();
-        if (clientSocket != INVALID_SOCKET) {
-            // Add the new client socket to the vector
-            clientSockets.push_back(clientSocket);
-
-            PRINT("handle client");
-            BroadcastMessage("Le serveur a une mise à jour!");
-
-            while (true) {
-                char buffer[4096];
-                int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-                if (bytesRead > 0) {
-                    buffer[bytesRead] = '\0';
-                    std::cout << "Received from client: " << buffer << std::endl;
-
-
-                    if (std::string(buffer) == "exit") {
-                        break;
-                    }
-                }
-                else {
-                    break;
-                }
-            }
-            closesocket(clientSocket);
-        }
+    if (WSAAsyncSelect(clientSocket, (*hwnd), WM_CLIENTS_SOCKET, FD_READ | FD_CLOSE) == SOCKET_ERROR) {
+        int errorCode = WSAGetLastError();
+        std::cout << "Failed to start asynchronous listening for client socket. Error code: " << errorCode << std::endl;
     }
 }
 
-void ServerSocket::BroadcastMessage(const std::string& message) {
+
+
+void ServerSocket::BroadcastMessage(const json& jsonData) {
+    std::string jsonString = jsonData.dump(); // Json to string with nlohmann
+
     for (SOCKET clientSocket : clientSockets) {
-        send(clientSocket, message.c_str(), message.size(), 0);
-        // Vous devrez gérer la logique d'erreur, la déconnexion éventuelle, etc.
+        send(clientSocket, jsonString.c_str(), jsonString.size(), 0);
     }
 }
 
-void ServerSocket::Close() {
-    for (SOCKET clientSocket : clientSockets) {
-        closesocket(clientSocket);
-    }
-    WSACleanup();
+void ServerSocket::Close(SOCKET clientSocket) {
+    closesocket(clientSocket);
 }

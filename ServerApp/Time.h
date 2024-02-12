@@ -13,3 +13,11 @@ inline void printTimestamp() {
     ctime_s(buffer, sizeof(buffer), &currentTime);
     std::cout << "Timestamp: " << buffer;
 }
+
+inline float getCurrentTime() {
+    auto now = std::chrono::high_resolution_clock::now();
+    auto duration = now.time_since_epoch();
+
+    // Convertir la durée en secondes à virgule flottante
+    return std::chrono::duration_cast<std::chrono::duration<float>>(duration).count();
+}

@@ -1,23 +1,18 @@
-#include <Ws2tcpip.h>  // Ajout de l'en-tête pour inet_pton
-#include <iostream>
-#include <Winsock2.h>
-#pragma comment(lib, "ws2_32.lib")
-#include "SFML/Graphics.hpp"
+#pragma once
+
+#include "Includes.h"
 
 #include "ClientSocket.h"
 #include "Defines.h"
-#include "Board.h"
 
 #include "Time.h"
 #include <chrono>
 #include <thread>
+#include "Utils.h"
+#include "JSON.h"
 
-
-struct Player {
-    std::string name;
-    Symbol symbol;
-    int score;
-};
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 void drawBoard(Render render, std::array<Symbol, 9> board) {
     render.pWindow->clear(sf::Color::Black); // Fond noir
@@ -32,17 +27,15 @@ void drawBoard(Render render, std::array<Symbol, 9> board) {
         sf::RectangleShape cell(sf::Vector2f(cellWidth, cellHeight));
         int row = i / cols;
         int col = i % cols;
-        cell.setPosition(col * (cellWidth + spacing), row * (cellHeight + spacing)); // Ajout de l'espacement
+        cell.setPosition(col * (cellWidth + spacing), row * (cellHeight + spacing)); 
         cell.setOutlineThickness(1.f);
         cell.setOutlineColor(sf::Color::White);
-        cell.setFillColor(sf::Color::Black); // Cellules noires
+        cell.setFillColor(sf::Color::Black); 
 
-        // Obtenez le symbole à partir du tableau board
         Symbol symbol = board[i];
 
         render.pWindow->draw(cell);
 
-        // Affichez une forme en fonction du symbole
         switch (symbol) {
         case Symbol::X: {
             sf::RectangleShape cross;
@@ -60,7 +53,6 @@ void drawBoard(Render render, std::array<Symbol, 9> board) {
             break;
         }
         default:
-            // Aucun symbole, vous pouvez ajouter du code pour traiter cela
             break;
         }
     }
@@ -68,89 +60,133 @@ void drawBoard(Render render, std::array<Symbol, 9> board) {
     render.pWindow->display();
 }
 
-void displayBoard(std::array<Symbol, 9> board) {
-    for (size_t i = 0; i < board.size(); ++i) {
-        char symbol = '-';
-        if (board[i] == Symbol::X) {
-            symbol = 'X';
-        }
-        else if (board[i] == Symbol::O) {
-            symbol = 'O';
-        }
-        std::cout << symbol << ' ';
 
-        if ((i + 1) % 3 == 0) {
-            std::cout << std::endl;
+
+int updateInput(Render render) {
+    if (render.pWindow->pollEvent(*(render.pEvent))) {
+        if (render.pEvent->type == sf::Event::Closed) {
+            PRINT("CLOSE");
+            render.pWindow->close();
+        }
+        if (render.pEvent->type == sf::Event::MouseButtonPressed && render.pEvent->mouseButton.button == sf::Mouse::Left) {
+            PRINT("left click");
+            return 1;
         }
     }
-    system("cls");
+    return 0;
 }
 
 sf::Vector2i getMousePosition(Render render) {
     sf::Vector2i currentPosition = sf::Mouse::getPosition((*(render.pWindow)));
     return currentPosition;
-
-
-}
-
-int placeSymbol(Render render, std::array<Symbol, 9> board, Player* currentPlayer = nullptr) {
-    sf::Vector2i mousePosition = getMousePosition(render); // Obtenez la position de la souris
-
-    int iCol = 3;
-
-
-    const float cellWidth = CALCULATE_CELL_SIZE(render.iWidth, iCol, 5);
-    const float cellHeight = CALCULATE_CELL_SIZE(render.iHeight, iCol, 5);
-
-
-    int indexX = CALCULATE_MOUSE_TO_INDEX(mousePosition.x, 5, cellWidth);
-    int IndexY = CALCULATE_MOUSE_TO_INDEX(mousePosition.y, 5, cellHeight);
-
-    int globalIndex = (IndexY * iCol) + indexX;
-
-    PRINT(globalIndex);
-    for (const auto& element : board) {
-        switch (element) {
-        case Symbol::X:
-            std::cout << "X" << std::endl;  // Affiche un texte pour le symbole X
-            break;
-        case Symbol::O:
-            std::cout << "O" << std::endl;  // Affiche un texte pour le symbole O
-            break;
-            // Ajoutez d'autres cas au besoin pour chaque symbole
-        case Symbol::Empty:
-            std::cout << "Autre" << std::endl;  // Cas par défaut si le symbole n'est pas X ou O
-        }
-    }
-
-    if (board[globalIndex] == Symbol::Empty) {
-        PRINT("Empty")
-            board[globalIndex] = currentPlayer->symbol;
-        return 0;
-    }
-
-    PRINT("No Empty")
-        return 1;
-
-
-
 }
 
 
-int main(Render render, std::array<Symbol, 9> board) {
+
+int main() {
+
     ClientSocket client("127.0.0.1", 80);
-    
-    if (client.Connect()) {
-        client.SendMessage("Premier message");
-    }
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-    client.SendMessage("Deuxième message");
+    client.Connect();
 
 
+    //Création d'une fenêtre
+    Render myRenderer{ new sf::RenderWindow(sf::VideoMode(640, 480), "SFML"), new sf::Event, 640, 480 };
 
+    std::array<Symbol, 9> board;
     for (int i = 0; i < 9; ++i) {
-                board[i] = Symbol::Empty;
+        board[i] = Symbol::Empty;
     }
 
-    return 0;
+    drawBoard(myRenderer, board);
+
+
+    while (myRenderer.pWindow->isOpen())
+    {
+
+        int inputState = updateInput(myRenderer);
+        if (inputState == 1) {
+            
+            sf::Vector2i mousePosition = getMousePosition(myRenderer);
+            json message = CreateJsonInputMessage("Input", std::to_string(mousePosition.x), std::to_string(mousePosition.y));
+            client.SendMessage(message);
+        }
+
+        ///
+        
+        json board = client.AwaitBroadcast();
+        if (board != json::object()) {
+
+            std::array<Symbol, 9> symbolArray;
+            PrintJson(board["data"]);
+
+            int i = 0;
+            for (const auto& item : board["data"]) {
+
+                if (item == 0) {
+                    symbolArray[i] = Symbol::Empty;
+                    PRINT("rentre1");
+                }
+                else if (item == 1) {
+                    symbolArray[i] = Symbol::X;
+                    PRINT("rentre2");
+                }
+                else if (item == 2) {
+                    symbolArray[i] = Symbol::O;
+                    PRINT("rentre3");
+                }
+
+                i++;
+            }
+
+            drawBoard(myRenderer, symbolArray);
+        }
+
+    }
+
+
 }
+
+
+
+
+
+
+
+//int main() {
+//    // Première connexion
+//    ClientSocket client("127.0.0.1", 80);
+//    client.Connect();
+//    std::this_thread::sleep_for(std::chrono::seconds(1));
+//    ClientSocket clientt("127.0.0.1", 80);
+//    clientt.Connect();
+//    std::this_thread::sleep_for(std::chrono::seconds(1));
+//    ClientSocket clienttt("127.0.0.1", 80);
+//    clienttt.Connect();
+//    std::this_thread::sleep_for(std::chrono::seconds(1));
+//
+//    std::this_thread::sleep_for(std::chrono::seconds(2));
+//    printTimestamp();
+//    std::cout << "CLIENT 3" << std::endl;
+//    clienttt.SendMessage("CLIENT 3");
+//
+//    std::this_thread::sleep_for(std::chrono::seconds(2));
+//    printTimestamp();
+//    std::cout << "CLIENT 2" << std::endl;
+//    clientt.SendMessage("CLIENT 2");
+//
+//    std::this_thread::sleep_for(std::chrono::seconds(2));
+//    printTimestamp();
+//    std::cout << "CLIENT 1" << std::endl;
+//    client.SendMessage("CLIENT 1");
+//
+//    //while (true) {
+//    //    client.AwaitBroadcast();
+//    //    PRINT("Client 1 recu message broadcast")
+//    //    clientt.AwaitBroadcast();
+//    //    PRINT("Client 2 recu message broadcast")
+//    //    clienttt.AwaitBroadcast();
+//    //    PRINT("Client 3 recu message broadcast")
+//    //}
+//
+//    return 0;
+//}
