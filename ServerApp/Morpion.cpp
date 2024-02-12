@@ -27,26 +27,23 @@ int Morpion::placeSymbol(sf::Vector2i mousePosition, int width, int height) {
 
     int globalIndex = (IndexY * iCol) + indexX;
 
-    PRINT(globalIndex);
-    for (const auto& element : board) {
-        switch (element) {
-        case Symbol::X:
-            std::cout << "X" << std::endl;  
-            break;
-        case Symbol::O:
-            std::cout << "O" << std::endl; 
-            break;
-        case Symbol::Empty:
-            std::cout << "Autre" << std::endl;  
-        }
-    }
 
-    PRINT("globalIndex");
-    PRINT(globalIndex);
+    //for (const auto& element : board) {
+    //    switch (element) {
+    //    case Symbol::X:
+    //        std::cout << "X" << std::endl;  
+    //        break;
+    //    case Symbol::O:
+    //        std::cout << "O" << std::endl; 
+    //        break;
+    //    case Symbol::Empty:
+    //        std::cout << "Autre" << std::endl;  
+    //    }
+    //}
 
     if (board[globalIndex] == Symbol::Empty) {
         PRINT("Empty")
-            board[globalIndex] = currentPlayer->symbol;
+        board[globalIndex] = currentPlayer->symbol;
         return 0;
     }
 

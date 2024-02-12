@@ -97,15 +97,17 @@ void ServerSocket::BroadcastMessage(const json& jsonData) {
     }
 }
 
-bool ServerSocket::isSocketAtIndex(SOCKET socketToCheck, size_t indexToCheck) {
+bool ServerSocket::isSocketAtIndex(SOCKET socketToCheck, int indexToCheck) {
     // find 
     auto it = std::find(clientSockets.begin(), clientSockets.end(), socketToCheck);
 
     // check is in vector / is it good index with distance
     if (it != clientSockets.end() && std::distance(clientSockets.begin(), it) == indexToCheck) {
+        PRINT("Return true - Socket in vector");
         return true;
     }
     else {
+        PRINT("Return false - Socket not in vector");
         return false;
     }
 }

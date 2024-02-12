@@ -46,25 +46,49 @@ int playerNumber = 0;
 //
 
 
-bool turn(sf::Vector2i mousePosition, size_t turnIndex, SOCKET inputSocket) {
-    int placeState = g_myMorpion->placeSymbol(mousePosition, 640, 480);
-    if (placeState == 1) {
-        std::cout << "Erreur de placement du symbole. Impossible de placer à cet emplacement." << std::endl;
+bool turn(sf::Vector2i mousePosition, int turnIndex, SOCKET inputSocket) {
+    //PRINT(player1);
+    //PRINT(player2);
+
+
+    // check is good player turn
+    if (!g_pServer->isSocketAtIndex(inputSocket, turnIndex)) {
+        //PRINT("It's not player turn");
         return false;
     }
+    else {
+        int placeState = g_myMorpion->placeSymbol(mousePosition, 640, 480);
+        if (placeState == 1) {
+            std::cout << "Erreur de placement du symbole. Impossible de placer à cet emplacement." << std::endl;
+            return false;
+        }
+        // Increment turn and change current player
+        //PRINT("It's good player turn");
+        g_myMorpion->currentPlayer = (g_turnCounter % 2 == 0) ? player2 : player1;
+        g_turnCounter++;
 
-
-    if (!g_pServer->isSocketAtIndex(inputSocket, turnIndex)) {
-        PRINT("It's not player turn");
-        return false
+        // Broadcast board to all clients
+        json boardJson = CreateJsonTable("Message", g_myMorpion->board);
+        g_pServer->BroadcastMessage(boardJson);
     }
 
-    std::cout << "Tour " << g_turnCounter << ": ";
-    std::cout << "Joueur actuel : " << g_myMorpion->currentPlayer->name << ", Symbole : " << static_cast<char>(g_myMorpion->currentPlayer->symbol) << std::endl;
+
+    //PRINT("Joueur actuel");
+    //if (turnIndex == 0) {
+    //    PRINT("C'est le player 1 ");
+    //}
+    //if (turnIndex == 1) {
+    //    PRINT("C'est le player 2 ");
+    //}
+
+
+    //std::cout << "Tour " << g_turnCounter << ": ";
+    //std::cout << "Joueur actuel : " << g_myMorpion->currentPlayer->name << ", Symbole : " << static_cast<char>(g_myMorpion->currentPlayer->symbol) << std::endl;
+
+
 
     // Draw
-    json boardJson = CreateJsonTable("Message", g_myMorpion->board);
-    g_pServer->BroadcastMessage(boardJson);
+
 
     return true;
 }
@@ -93,8 +117,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                     PRINT("Set player2");
                     player2 = new Player("Player2", Symbol::O, 0);
                 }
-
-
             }
             else {
                 break;
@@ -105,12 +127,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             std::cout << "Nouvelle connexion établie." << std::endl;
             g_pServer->AddClientSocket(newClientSocket, g_hwnd);
 
-            
-
-
-
-
-            
         }
         break;
     }
@@ -129,11 +145,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 std::stoi(receivedJson["y"].get<std::string>())
             };
 
-            //PRINT(mousePosition.x);
-            //PRINT(mousePosition.y);
+
             // current turn (0 or 1)
             // current socket
-            size_t index = g_turnCounter % 2;
+            int index = g_turnCounter % 2;
             PRINT("current Index");
             PRINT(index);
 
@@ -141,15 +156,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
             turn(mousePosition, index, clientSocket);
 
-            if (g_myMorpion->checkEnd(Symbol::X) || g_myMorpion->checkEnd(Symbol::O)) {
-                //PRINT("Partie terminé, joueur gagnant :")
-                //PRINT(myMorpion->currentPlayer->name);
-                //break;
-            }
+            //if (g_myMorpion->checkEnd(Symbol::X) || g_myMorpion->checkEnd(Symbol::O)) {
+            //    //PRINT("Partie terminé, joueur gagnant :")
+            //    //PRINT(myMorpion->currentPlayer->name);
+            //    //break;
+            //}
 
              //Transition next it
-            g_myMorpion->currentPlayer = (g_turnCounter % 2 == 0) ? player2 : player1;
-            g_turnCounter++;
         }
 
 
@@ -203,7 +216,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     }
 
     g_myMorpion = new Morpion();
-    g_myMorpion->currentPlayer = player1;
 
 
 

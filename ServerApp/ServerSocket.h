@@ -18,7 +18,7 @@ public:
     void AddClientSocket(SOCKET clientSocket, HWND* hwnd);
     void BroadcastMessage(const json& jsonData);
 
-    bool isSocketAtIndex(SOCKET socketToCheck, size_t indexToCheck);
+    bool isSocketAtIndex(SOCKET socketToCheck, int indexToCheck);
   
     void Close(SOCKET clientSocket);
 
