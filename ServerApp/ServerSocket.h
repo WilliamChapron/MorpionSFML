@@ -17,7 +17,14 @@ public:
     bool StartAsyncListening(HWND* hwnd);
     void AddClientSocket(SOCKET clientSocket, HWND* hwnd);
     void BroadcastMessage(const json& jsonData);
+
+    bool isSocketAtIndex(SOCKET socketToCheck, size_t indexToCheck);
+  
     void Close(SOCKET clientSocket);
+
+
+    // var
+
     int port;
     SOCKET listenSocket;
     std::vector<SOCKET> clientSockets;

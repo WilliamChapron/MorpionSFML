@@ -49,6 +49,8 @@ bool ClientSocket::SendMessage(const json& jsonObject) {
 
     return true;
 
+    // * Return Response *
+
     /*char buffer[4024];
     int bytesRead;
 
@@ -68,7 +70,6 @@ bool ClientSocket::SendMessage(const json& jsonObject) {
 }
 
 json ClientSocket::AwaitBroadcast() {
-    //PRINT("On await");
     json receivedJson = ReceiveJsonFromSocket(clientSocket);
 
     if (!receivedJson.empty()) {
@@ -77,8 +78,6 @@ json ClientSocket::AwaitBroadcast() {
     }
     return receivedJson;
 }
-
-
 
 void ClientSocket::Close()
 {

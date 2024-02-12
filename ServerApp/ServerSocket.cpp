@@ -97,6 +97,19 @@ void ServerSocket::BroadcastMessage(const json& jsonData) {
     }
 }
 
+bool ServerSocket::isSocketAtIndex(SOCKET socketToCheck, size_t indexToCheck) {
+    // find 
+    auto it = std::find(clientSockets.begin(), clientSockets.end(), socketToCheck);
+
+    // check is in vector / is it good index with distance
+    if (it != clientSockets.end() && std::distance(clientSockets.begin(), it) == indexToCheck) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 void ServerSocket::Close(SOCKET clientSocket) {
     closesocket(clientSocket);
 }

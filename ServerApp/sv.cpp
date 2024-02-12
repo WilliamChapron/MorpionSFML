@@ -1,5 +1,5 @@
 
-#include "Render.h"
+
 #include "Morpion.h"
 
 
@@ -7,8 +7,6 @@
 #include "Includes.h"
 #include "ServerSocket.h"
 #include "Defines.h"
-#include "GameManager.h"
-//#include "SetPlayers.h"
 #include "Morpion.h"
 
 #include "Time.h"
@@ -35,14 +33,30 @@ Player* player1 = nullptr;
 Player* player2 = nullptr;
 int playerNumber = 0;
 
+//void handlePlayerAction(Player* player, Render render) {
+//    if (player == currentPlayer) {
+//        int placeState = morpion.placeSymbol(render);
+//        if (placeState == 0) {
+//            currentPlayer = (currentPlayer == player1) ? player2 : player1; // switch joueur après chaque coup
+//            // Maintenant, vous pouvez envoyer les mises à jour de l'état du jeu aux clients ici
+//        }
+//    }
+//}
+//
+//
 
 
-
-bool turn(sf::Vector2i mousePosition) {
+bool turn(sf::Vector2i mousePosition, size_t turnIndex, SOCKET inputSocket) {
     int placeState = g_myMorpion->placeSymbol(mousePosition, 640, 480);
     if (placeState == 1) {
         std::cout << "Erreur de placement du symbole. Impossible de placer à cet emplacement." << std::endl;
         return false;
+    }
+
+
+    if (!g_pServer->isSocketAtIndex(inputSocket, turnIndex)) {
+        PRINT("It's not player turn");
+        return false
     }
 
     std::cout << "Tour " << g_turnCounter << ": ";
@@ -115,9 +129,17 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 std::stoi(receivedJson["y"].get<std::string>())
             };
 
-            PRINT(mousePosition.x);
-            PRINT(mousePosition.y);
-            turn(mousePosition);
+            //PRINT(mousePosition.x);
+            //PRINT(mousePosition.y);
+            // current turn (0 or 1)
+            // current socket
+            size_t index = g_turnCounter % 2;
+            PRINT("current Index");
+            PRINT(index);
+
+
+
+            turn(mousePosition, index, clientSocket);
 
             if (g_myMorpion->checkEnd(Symbol::X) || g_myMorpion->checkEnd(Symbol::O)) {
                 //PRINT("Partie terminé, joueur gagnant :")
