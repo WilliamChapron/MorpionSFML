@@ -29,9 +29,6 @@ public:
 
     int placeSymbol(sf::Vector2i mousePosition, int width, int height);
 
-    void displayBoard() const;
-    void drawBoard(Render render) const;
-
     bool checkHorizontalWin(Symbol playerSymbol) const;
 
     bool checkVerticalWin(Symbol playerSymbol) const;
@@ -41,6 +38,4 @@ public:
     bool checkBoardFull() const;
 
     bool checkEnd(Symbol playerSymbol) const;
-
-    std::string getBoardState() const;
 };

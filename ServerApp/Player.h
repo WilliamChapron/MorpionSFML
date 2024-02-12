@@ -2,7 +2,6 @@
 
 #include <string> // Inclure la bibliothèque pour std::string
 
-#include "Render.h"
 #include "Input.h"
 #include "Morpion.h"
 #include "Defines.h"

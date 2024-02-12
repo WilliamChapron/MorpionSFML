@@ -133,27 +133,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Includes.h" />
     <ClCompile Include="Input.cpp" />
-    <ClCompile Include="SetPlayer.cpp" />
     <ClCompile Include="sv.cpp" />
     <ClCompile Include="Morpion.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Render.cpp" />
     <ClCompile Include="ServerSocket.cpp" />
     <ClCompile Include="Time.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Defines.h" />
-    <ClInclude Include="GameManager.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="JSON.h" />
     <ClInclude Include="Morpion.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="Render.h" />
     <ClInclude Include="ServerSocket.h" />
-    <ClInclude Include="SetPlayer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
