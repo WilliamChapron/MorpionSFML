@@ -13,21 +13,49 @@ Morpion::Morpion() {
     }
 }
 
-int Morpion::placeSymbol(int cellIndex) {
-    int row = cellIndex / 3;
-    int col = cellIndex % 3;
+int Morpion::placeSymbol(sf::Vector2i mousePosition, int width, int height) {
 
-    if (board[cellIndex] == Symbol::Empty) {
-        // Placer le symbole du joueur actuel dans la cellule
-        board[cellIndex] = currentPlayer->symbol;
+    int iCol = 3;
+
+
+    const float cellWidth = CALCULATE_CELL_SIZE(width, iCol, 5);
+    const float cellHeight = CALCULATE_CELL_SIZE(height, iCol, 5);
+
+
+    int indexX = CALCULATE_MOUSE_TO_INDEX(mousePosition.x, 5, cellWidth);
+    int IndexY = CALCULATE_MOUSE_TO_INDEX(mousePosition.y, 5, cellHeight);
+
+    int globalIndex = (IndexY * iCol) + indexX;
+
+    PRINT(globalIndex);
+    for (const auto& element : board) {
+        switch (element) {
+        case Symbol::X:
+            std::cout << "X" << std::endl;  
+            break;
+        case Symbol::O:
+            std::cout << "O" << std::endl; 
+            break;
+        case Symbol::Empty:
+            std::cout << "Autre" << std::endl;  
+        }
+    }
+
+    PRINT("globalIndex");
+    PRINT(globalIndex);
+
+    if (board[globalIndex] == Symbol::Empty) {
+        PRINT("Empty")
+            board[globalIndex] = currentPlayer->symbol;
         return 0;
     }
-    else {
-        // La cellule n'est pas vide
-        return 1;
-    }
-}
 
+    PRINT("No Empty")
+        return 1;
+
+
+
+}
 
 
 bool Morpion::checkHorizontalWin(Symbol playerSymbol) const {
@@ -49,11 +77,11 @@ bool Morpion::checkVerticalWin(Symbol playerSymbol) const {
 }
 
 bool Morpion::checkDiagonalWin(Symbol playerSymbol) const {
-    // Vérification de la diagonale principale
+    // Vï¿½rification de la diagonale principale
     if (board[0] == playerSymbol && board[4] == playerSymbol && board[8] == playerSymbol) {
         return true;
     }
-    // Vérification de la diagonale secondaire
+    // Vï¿½rification de la diagonale secondaire
     if (board[2] == playerSymbol && board[4] == playerSymbol && board[6] == playerSymbol) {
         return true;
     }
@@ -112,7 +140,7 @@ void Morpion::drawBoard(Render render) const {
         cell.setOutlineColor(sf::Color::White);
         cell.setFillColor(sf::Color::Black); // Cellules noires
 
-        // Obtenez le symbole à partir du tableau board
+        // Obtenez le symbole ï¿½ partir du tableau board
         Symbol symbol = board[i];
 
         render.pWindow->draw(cell);
@@ -143,6 +171,7 @@ void Morpion::drawBoard(Render render) const {
     render.pWindow->display();
 }
 
+
 std::string Morpion::getBoardState() const {
     std::string state;
     for (const auto& symbol : board) {
@@ -160,4 +189,3 @@ std::string Morpion::getBoardState() const {
     }
     return state;
 }
-

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SFML/Graphics.hpp>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>

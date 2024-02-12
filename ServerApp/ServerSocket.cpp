@@ -5,10 +5,14 @@ ServerSocket::ServerSocket(int port) : port(port), listenSocket(INVALID_SOCKET) 
 }
 
 ServerSocket::~ServerSocket() {
-    Close();
+    for (SOCKET clientSocket : clientSockets) {
+        closesocket(clientSocket);
+    }
+    WSACleanup();
 }
 
-bool ServerSocket::StartAsyncListening(HWND hwnd) {
+bool ServerSocket::StartAsyncListening(HWND* hwnd) {
+
     // Initialiser Winsock
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -30,7 +34,7 @@ bool ServerSocket::StartAsyncListening(HWND hwnd) {
 
     if (inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr) != 1) {
         std::cerr << "Failed to convert IP address." << std::endl;
-        Close();
+        Close(listenSocket);
         return false;
     }
 
@@ -39,45 +43,60 @@ bool ServerSocket::StartAsyncListening(HWND hwnd) {
     // Lier le socket
     if (bind(listenSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR) {
         std::cerr << "Failed to bind socket." << std::endl;
-        Close();
+        Close(listenSocket);
         return false;
     }
 
     // Associer le socket � un �v�nement
-    if (WSAAsyncSelect(listenSocket, hwnd, WM_SOCKET, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR) {
+    if (WSAAsyncSelect(listenSocket, (*hwnd), WM_LISTEN_SOCKET, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR) {
         std::cerr << "Failed to start asynchronous listening." << std::endl;
-        Close();
+        Close(listenSocket);
         return false;
     }
 
     // �couter les connexions entrantes
     if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
         std::cerr << "Failed to listen for incoming connections." << std::endl;
-        Close();
+        Close(listenSocket);
+        return false;
+    }
+
+    // Associer le socket � un �v�nement
+    if (WSAAsyncSelect(listenSocket, (*hwnd), WM_LISTEN_SOCKET, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR) {
+        std::cerr << "Failed to start asynchronous listening." << std::endl;
+        Close(listenSocket);
+        return false;
+    }
+
+    // �couter les connexions entrantes
+    if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
+        std::cerr << "Failed to listen for incoming connections." << std::endl;
+        closesocket(listenSocket);
         return false;
     }
 
     return true;
 }
 
-void ServerSocket::HandleClients() {
-    // Cette fonction est destin�e � �tre utilis�e avec WSAAsyncSelect
-    // G�rer les connexions et les donn�es entrantes de mani�re asynchrone
-    // G�rer les �v�nements FD_ACCEPT et FD_READ dans la proc�dure de fen�tre
+void ServerSocket::AddClientSocket(SOCKET clientSocket, HWND* hwnd) {
+    clientSockets.push_back(clientSocket);
 
-    // Vous devez impl�menter la logique de cette fonction en fonction de vos besoins
-    // par exemple, traiter les connexions entrantes, lire les donn�es, etc.
-}
-
-void ServerSocket::BroadcastMessage(const std::string& message) {
-    for (SOCKET clientSocket : clientSockets) {
-        send(clientSocket, message.c_str(), message.size(), 0);
+    if (WSAAsyncSelect(clientSocket, (*hwnd), WM_CLIENTS_SOCKET, FD_READ | FD_CLOSE) == SOCKET_ERROR) {
+        int errorCode = WSAGetLastError();
+        std::cout << "Failed to start asynchronous listening for client socket. Error code: " << errorCode << std::endl;
     }
 }
 
-void ServerSocket::Close() {
+
+
+void ServerSocket::BroadcastMessage(const json& jsonData) {
+    std::string jsonString = jsonData.dump(); // Json to string with nlohmann
+
     for (SOCKET clientSocket : clientSockets) {
-        closesocket(clientSocket);
+        send(clientSocket, jsonString.c_str(), jsonString.size(), 0);
     }
-    WSACleanup();
+}
+
+void ServerSocket::Close(SOCKET clientSocket) {
+    closesocket(clientSocket);
 }

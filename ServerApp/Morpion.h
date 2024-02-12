@@ -1,6 +1,7 @@
-// Morpion.h
 #pragma once
 
+
+#include "Includes.h"
 #include <iostream>
 #include <array>
 
@@ -10,22 +11,25 @@ enum class Symbol {
     O
 };
 
-struct Render; // Forward declaration de la classe Render
-
+struct Render;
 struct Player;
 
 class Morpion {
 private:
-    std::array<Symbol, 9> board;
+
+
+
 
 public:
     Morpion();
 
     Player* currentPlayer = nullptr;
 
-    int placeSymbol(int cellIndex);
+    std::array<Symbol, 9> board;
 
-    void displayBoard() const; // Draw Grid
+    int placeSymbol(sf::Vector2i mousePosition, int width, int height);
+
+    void displayBoard() const;
     void drawBoard(Render render) const;
 
     bool checkHorizontalWin(Symbol playerSymbol) const;
