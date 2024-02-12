@@ -2,30 +2,38 @@
 #include "Render.h"
 #include "Morpion.h"
 
+//bool turn(Render render, Morpion* morpion, int turnCounter) {
+//    int placeState = morpion->placeSymbol(render);
+//    if (placeState == 1) {
+//        std::cout << "Erreur de placement du symbole. Impossible de placer à cet emplacement." << std::endl;
+//        return false;
+//    }
+//
+//    std::cout << "Tour " << turnCounter << ": ";
+//    std::cout << "Joueur actuel : " << morpion->currentPlayer->name << ", Symbole : " << static_cast<char>(morpion->currentPlayer->symbol) << std::endl;
+//
+//    morpion->drawBoard(render);
+//
+//    return true;
+//}
 
 
 #include "Includes.h"
 #include "ServerSocket.h"
 #include "Defines.h"
 #include "GameManager.h"
-//#include "SetPlayers.h"
+#include "SetPlayers.h"
 #include "Morpion.h"
 
 #include "Time.h"
-
-#include "Player.h"
 
 #include "ServerSocket.h"
 
 #include <iostream>
 #include <fstream>
-#include <sstream>
 
 
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
-#include "JSON.h";
-
+Morpion morpion;
 
 HWND* g_hwnd = nullptr;
 ServerSocket* g_pServer = nullptr;
@@ -103,10 +111,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_CLIENTS_SOCKET:
     {
 
-
         SOCKET clientSocket = static_cast<SOCKET>(wParam);
 
-        json receivedJson = ReceiveJsonFromSocket(clientSocket);
+        char buffer[4024];
+        int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
 
         if (!receivedJson.empty()) {
 
@@ -124,6 +132,20 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 //PRINT(myMorpion->currentPlayer->name);
                 //break;
             }
+
+            // Vérifier si le message est un clic de souris
+            if (receivedData.substr(0, 5) == "Click") {
+
+            }
+
+
+        }
+        else if (bytesRead == 0) {
+            std::cout << "Nothing received from client : " << std::endl;
+            // #TODO Send Failed to client with send
+            // #TODO Handle when client disconnected
+            // #TODO Handle Broadcast to all clients
+            // #NOW bidirectional request, request and response + connection timed out working
 
              //Transition next it
             g_myMorpion->currentPlayer = (g_turnCounter % 2 == 0) ? player2 : player1;
@@ -152,7 +174,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     WNDCLASS wc = {};
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
-    wc.lpszClassName = "ServerWindowClass";
+    wc.lpszClassName = L"ServerWindowClass";
 
     RegisterClass(&wc);
 
@@ -216,11 +238,92 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return 0;
 }
 
+//
+////MORPION BASIC
+//int main(int argc, char** argv)
+//{
+//
+//    std::cout << "SERVER" << std::endl;
+//    
+//
+//    WSADATA wsaData;
+//    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+//        std::cerr << "Failed to initialize Winsock." << std::endl;
+//        return 1;
+//    }
+//
+//    ServerSocket server(80);
+//    if (server.StartListening()) {
+//        server.HandleClients();
+//    }
+//
+//    return 0;
+//
+//
+//
+//
+//
+//
+    ////Création d'une fenêtre
+    //Render myRenderer{new sf::RenderWindow(sf::VideoMode(640, 480), "SFML"), new sf::Event, 640, 480};
+    //Morpion* myMorpion;
+    //myMorpion = new Morpion;
+
+    //Player* player1 = nullptr;
+    //player1 = new Player{ "William", Symbol::X, 0};
+
+    //Player* player2 = nullptr;
+    //player2 = new Player{ "Bot", Symbol::O, 0 };
 
 
+    ////GameLoop
+    //myMorpion->drawBoard(myRenderer);
+    //myMorpion->currentPlayer = player1;
+    //int turnCounter = 0;
+    //while (myRenderer.pWindow->isOpen())
+    //{
+
+    //    
 
 
-// #TODO Send Failed to client with send
-            // #TODO Handle when client disconnected
-            // #TODO Handle Broadcast to all clients
-            // #NOW bidirectional request, request and response + connection timed out working
+    //    //EVENT
+    //    int inputState = updateInput(myRenderer);
+    //    //PRINT(myMorpion.currentPlayer->name)
+    //    if (inputState == 0) {
+    //        //PRINT("Pas d'Input")
+    //        continue;
+    //    }
+    //    else if(inputState == 1) {
+    //        if (!turn(myRenderer, myMorpion, turnCounter))
+    //        {
+    //            continue;
+    //        };
+    //    }
+//
+//
+//
+//
+//   
+//
+//
+//
+    //    //PRINT("Action")
+
+    //    //UPDATE
+
+    //    //DRAW
+    //    if (myMorpion->checkEnd(Symbol::X) || myMorpion->checkEnd(Symbol::O)) {
+    //        PRINT("Partie terminé, joueur gagnant :")
+    //        PRINT(myMorpion->currentPlayer->name);
+    //        //break;
+    //    }
+
+    //    // Transition next it
+    //    myMorpion->currentPlayer = (turnCounter % 2 == 0) ? player2 : player1;
+    //    turnCounter++;
+
+
+    //}
+
+//   return 0;
+//}
