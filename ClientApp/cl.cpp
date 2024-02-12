@@ -1,43 +1,26 @@
-#include <SFML/Graphics.hpp>
+#include <Ws2tcpip.h>  // Ajout de l'en-tête pour inet_pton
 #include <iostream>
+#include <Winsock2.h>
+#pragma comment(lib, "ws2_32.lib")
+
 #include "ClientSocket.h"
 #include "Defines.h"
 
+#include "Time.h"
+#include <chrono>
+#include <thread>
+
+
 int main() {
-    // Création d'une fenêtre SFML
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Tic Tac Toe Client");
-
-    // Créez une instance de ClientSocket pour communiquer avec le serveur
     ClientSocket client("127.0.0.1", 80);
-
+    
     if (client.Connect()) {
-        // Connectez-vous au serveur
-        client.SendMessage("Connexion établie");
-
-        // Boucle principale du client
-        while (window.isOpen()) {
-            sf::Event event;
-            while (window.pollEvent(event)) {
-                if (event.type == sf::Event::Closed) {
-                    window.close();
-                }
-                else if (event.type == sf::Event::MouseButtonPressed) {
-                    // Récupérer les coordonnées de la souris
-                    sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-                    std::cout << "Coordonnées de la souris : " << mousePosition.x << ", " << mousePosition.y << std::endl;
-
-                    // Envoyer les coordonnées de la souris au serveur
-                    // Format : "X,Y"
-                    std::string message = std::to_string(mousePosition.x) + "," + std::to_string(mousePosition.y);
-                    client.SendMessage(message.c_str());
-                }
-            }
-
-            window.clear();
-            // Dessinez ici votre interface utilisateur, par exemple, une grille de tic-tac-toe
-            window.display();
-        }
+        client.SendMessage("Premier message");
     }
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    client.SendMessage("Deuxième message");
+
+
 
     return 0;
 }

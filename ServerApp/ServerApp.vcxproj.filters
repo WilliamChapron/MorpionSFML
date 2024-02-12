@@ -8,7 +8,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="ServerSocket.cpp" />
     <ClCompile Include="Time.h" />
-    <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="Includes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render.h" />
@@ -17,6 +17,5 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="ServerSocket.h" />
-    <ClInclude Include="GameManager.h" />
   </ItemGroup>
 </Project>

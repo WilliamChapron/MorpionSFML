@@ -5,7 +5,7 @@ ClientSocket::ClientSocket(const char* serverIp, int serverPort)
 {
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-    // Création du socket client
+    // Crï¿½ation du socket client
     clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     // Configuration de l'adresse et du port du serveur
@@ -34,14 +34,4 @@ bool ClientSocket::SendMessage(const char* message)
 {
     PRINT("Send message ... ");
     return send(clientSocket, message, strlen(message), 0) != SOCKET_ERROR;
-}
-
-bool ClientSocket::ReceiveMessage(char* buffer, int bufferSize) 
-{
-    int bytesReceived = recv(clientSocket, buffer, bufferSize, 0);
-    if (bytesReceived > 0) {
-        buffer[bytesReceived] = '\0';
-        return true;
-    }
-    return false;
 }

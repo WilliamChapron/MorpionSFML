@@ -1,19 +1,19 @@
 #pragma once
 
-#include <WinSock2.h>
-#include <iostream>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <vector>
+#include <string>
 
-class GameManager; // Forward declaration de GameManager
+#define WM_SOCKET (WM_USER + 1)
 
 class ServerSocket {
 public:
     ServerSocket(int port);
     ~ServerSocket();
 
-    bool StartListening();
-    SOCKET AcceptConnection();
-    void HandleClients(GameManager& gameManager); // Modifier pour accepter un GameManager
+    bool StartAsyncListening(HWND hwnd);
+    void HandleClients();
     void BroadcastMessage(const std::string& message);
     void Close();
 

@@ -1,24 +1,22 @@
 #include "ServerSocket.h"
-#include "Defines.h"
-#include "GameManager.h"
+#include <iostream>
 
-ServerSocket::ServerSocket(int port) : port(port), listenSocket(INVALID_SOCKET) 
-{
+ServerSocket::ServerSocket(int port) : port(port), listenSocket(INVALID_SOCKET) {
 }
 
 ServerSocket::~ServerSocket() {
     Close();
 }
 
-bool ServerSocket::StartListening() {
-    // Initialize Winsock
+bool ServerSocket::StartAsyncListening(HWND hwnd) {
+    // Initialiser Winsock
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         std::cerr << "Failed to initialize Winsock." << std::endl;
         return false;
     }
 
-    // Create socket
+    // Crï¿½er le socket
     listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (listenSocket == INVALID_SOCKET) {
         std::cerr << "Failed to create socket." << std::endl;
@@ -26,15 +24,35 @@ bool ServerSocket::StartListening() {
         return false;
     }
 
-    // Configure server address
+    // Configurer l'adresse du serveur
     sockaddr_in serverAddress;
     serverAddress.sin_family = AF_INET;
-    serverAddress.sin_addr.s_addr = INADDR_ANY;
+
+    if (inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr) != 1) {
+        std::cerr << "Failed to convert IP address." << std::endl;
+        Close();
+        return false;
+    }
+
     serverAddress.sin_port = htons(port);
 
-    // Bind the socket
+    // Lier le socket
     if (bind(listenSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR) {
         std::cerr << "Failed to bind socket." << std::endl;
+        Close();
+        return false;
+    }
+
+    // Associer le socket ï¿½ un ï¿½vï¿½nement
+    if (WSAAsyncSelect(listenSocket, hwnd, WM_SOCKET, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR) {
+        std::cerr << "Failed to start asynchronous listening." << std::endl;
+        Close();
+        return false;
+    }
+
+    // ï¿½couter les connexions entrantes
+    if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
+        std::cerr << "Failed to listen for incoming connections." << std::endl;
         Close();
         return false;
     }
@@ -42,61 +60,18 @@ bool ServerSocket::StartListening() {
     return true;
 }
 
-SOCKET ServerSocket::AcceptConnection() {
-    // Listen for incoming connections
-    if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
-        std::cerr << "Failed to listen for incoming connections." << std::endl;
-        Close();
-        return INVALID_SOCKET;
-    }
+void ServerSocket::HandleClients() {
+    // Cette fonction est destinï¿½e ï¿½ ï¿½tre utilisï¿½e avec WSAAsyncSelect
+    // Gï¿½rer les connexions et les donnï¿½es entrantes de maniï¿½re asynchrone
+    // Gï¿½rer les ï¿½vï¿½nements FD_ACCEPT et FD_READ dans la procï¿½dure de fenï¿½tre
 
-    // Accept the connection
-    SOCKET clientSocket = accept(listenSocket, nullptr, nullptr);
-    if (clientSocket == INVALID_SOCKET) {
-        std::cerr << "Failed to accept connection." << std::endl;
-        Close();
-        return INVALID_SOCKET;
-    }
-
-    return clientSocket;
-}
-
-void ServerSocket::HandleClients(GameManager& gameManager) {
-    while (true) {
-        SOCKET clientSocket = AcceptConnection();
-        if (clientSocket != INVALID_SOCKET) {
-            clientSockets.push_back(clientSocket);
-            BroadcastMessage("Le serveur a une mise à jour!");
-
-            while (true) {
-                // Recevoir les données du client
-                char buffer[4096];
-                int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-                if (bytesRead > 0) {
-                    buffer[bytesRead] = '\0';
-                    std::cout << "Received from client: " << buffer << std::endl;
-
-                    // Envoyer les mises à jour du jeu au client
-                    std::string gameState = gameManager.GetGameState();
-                    send(clientSocket, gameState.c_str(), gameState.size(), 0);
-
-                    if (std::string(buffer) == "exit") {
-                        break;
-                    }
-                }
-                else {
-                    break;
-                }
-            }
-            closesocket(clientSocket);
-        }
-    }
+    // Vous devez implï¿½menter la logique de cette fonction en fonction de vos besoins
+    // par exemple, traiter les connexions entrantes, lire les donnï¿½es, etc.
 }
 
 void ServerSocket::BroadcastMessage(const std::string& message) {
     for (SOCKET clientSocket : clientSockets) {
         send(clientSocket, message.c_str(), message.size(), 0);
-        // Vous devrez gérer la logique d'erreur, la déconnexion éventuelle, etc.
     }
 }
 
