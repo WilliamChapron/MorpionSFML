@@ -142,6 +142,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="ServerSocket.cpp" />
+    <ClCompile Include="SThread.cpp" />
     <ClCompile Include="Time.h" />
   </ItemGroup>
   <ItemGroup>
@@ -154,6 +155,7 @@
     <ClInclude Include="Render.h" />
     <ClInclude Include="ServerSocket.h" />
     <ClInclude Include="SetPlayer.h" />
+    <ClInclude Include="SThread.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

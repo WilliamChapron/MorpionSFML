@@ -11,6 +11,7 @@
     <ClCompile Include="Includes.h" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="SetPlayer.cpp" />
+    <ClCompile Include="SThread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Render.h" />
@@ -22,6 +23,7 @@
     <ClInclude Include="JSON.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="SetPlayer.h" />
+    <ClInclude Include="SThread.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
