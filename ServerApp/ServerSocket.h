@@ -1,35 +1,31 @@
+// ServerSocket.h
 #pragma once
 
 #include "Includes.h"
 #include "Defines.h"
-#include <vector>
-#include <string>
+#include "JSON.h"
 
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
-
+//#include <nlohmann/json.hpp>
+//using json = nlohmann::json;
 
 class ServerSocket {
 public:
-    ServerSocket(int port);
+    ServerSocket(int port, HINSTANCE hInstance);
     ~ServerSocket();
 
-    bool StartAsyncListening(HWND* hwnd);
-    void AddClientSocket(SOCKET clientSocket, HWND* hwnd);
+    bool StartAsyncListening();
+    void AddClientSocket(SOCKET clientSocket);
     void BroadcastMessage(const json& jsonData);
-
     bool isSocketAtIndex(SOCKET socketToCheck, int indexToCheck);
-  
-    void Close(SOCKET clientSocket);
+    void Close();
 
-
-    // var
-
+private:
     int port;
     SOCKET listenSocket;
     std::vector<SOCKET> clientSockets;
+    HWND hwnd;
+    FILE* pCout;
 
-private:
 
-
+    static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

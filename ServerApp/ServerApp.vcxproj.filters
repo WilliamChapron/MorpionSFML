@@ -7,6 +7,7 @@
     <ClCompile Include="ServerSocket.cpp" />
     <ClCompile Include="Time.h" />
     <ClCompile Include="Includes.h" />
+    <ClCompile Include="App.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Player.h" />
@@ -14,6 +15,7 @@
     <ClInclude Include="Defines.h" />
     <ClInclude Include="ServerSocket.h" />
     <ClInclude Include="JSON.h" />
+    <ClInclude Include="App.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

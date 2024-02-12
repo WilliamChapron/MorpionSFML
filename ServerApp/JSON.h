@@ -24,6 +24,20 @@ inline json CreateJsonMessage(const std::string& messageType, const std::string&
     return message;
 }
 
+inline json CreateJsonInputMessage(const std::string& messageType, const std::string& x, const std::string& y) {
+    json message;
+
+
+    // Send message
+    message["type"] = messageType;
+    message["x"] = x;
+    message["y"] = y;
+    message["timestamp"] = getCurrentTime();
+
+
+    return message;
+}
+
 inline json CreateJsonTable(const std::string& messageType, const std::array<Symbol, 9>& dataArray) {
     json message;
 
@@ -37,19 +51,22 @@ inline json CreateJsonTable(const std::string& messageType, const std::array<Sym
 }
 
 
-json ReceiveJsonFromSocket(SOCKET socket) {
+inline json ReceiveJsonFromSocket(SOCKET socket) {
     char buffer[4096];
     int bytesRead;
     std::string receivedData;
 
-    // while (true) {
     bytesRead = recv(socket, buffer, sizeof(buffer), 0);
 
-    if (bytesRead <= 0) {
+    if (bytesRead == -1) {
         return json::object();
     }
-
-    receivedData += std::string(buffer, bytesRead);
-    return json::parse(receivedData);
-    //}
+    else if (bytesRead <= 0) {
+        return json::object();
+    }
+    else {
+        // Données reçues avec succès
+        receivedData += std::string(buffer, bytesRead);
+        return json::parse(receivedData);
+    }
 }

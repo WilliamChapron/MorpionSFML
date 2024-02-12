@@ -1,24 +1,48 @@
 // App.cpp
 #include "App.h"
+#include "JSON.h"
+#include "ServerSocket.h"
+#include "Morpion.h"
 
-// Initialisation de l'instance statique à nullptr
 App* App::instance = nullptr;
 
-App::App() : pServer(nullptr), myMorpion(nullptr), turnCounter(0), player1(nullptr), player2(nullptr), playerNumber(0), pCout(nullptr) {
+App::App() : pServer(nullptr), myMorpion(nullptr), turnCounter(0), player1(nullptr), player2(nullptr), playerNumber(0) {
 }
+
+
+bool App:: turn(sf::Vector2i mousePosition, int turnIndex, SOCKET inputSocket) {
+    // check is good player turn
+    if (!pServer->isSocketAtIndex(inputSocket, turnIndex)) {
+        return false;
+    }
+    else {
+        int placeState = myMorpion->placeSymbol(mousePosition, 640, 480);
+        if (placeState == 1) {
+            std::cout << "Erreur de placement du symbole. Impossible de placer à cet emplacement." << std::endl;
+            return false;
+        }
+        // Increment turn and change current player
+        myMorpion->currentPlayer = (turnCounter % 2 == 0) ? player2 : player1;
+        turnCounter++;
+
+        // Broadcast board to all clients
+        json boardJson = CreateJsonTable("Message", myMorpion->board);
+        pServer->BroadcastMessage(boardJson);
+    }
+
+
+    return true;
+}
+
 
 App::~App() {
     delete pServer;
     delete myMorpion;
     delete player1;
     delete player2;
-
-    fclose(pCout);
-    FreeConsole();
 }
 
 App* App::GetInstance() {
-    // Crée l'instance si elle n'existe pas déjà
     if (instance == nullptr) {
         instance = new App();
     }
@@ -27,36 +51,10 @@ App* App::GetInstance() {
 }
 
 void App::Init(HINSTANCE hInstance) {
-    AllocConsole(); // Créer une nouvelle console
-    freopen_s(&pCout, "CONOUT$", "w", stdout);
 
-    WNDCLASS wc = {};
-    wc.lpfnWndProc = WindowProc;
-    wc.hInstance = hInstance;
-    wc.lpszClassName = "ServerWindowClass";
-
-    RegisterClass(&wc);
-
-    hwnd = new CreateWindowExW(
-        0,
-        L"ServerWindowClass",
-        L"Server App",
-        WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, 800, 600,
-        0,
-        0,
-        hInstance,
-        0);
-
-    if (!hwnd) return;
-
-    hwnd = &hwnd;
-
-    ShowWindow(&hwnd, SW_HIDE);
-
-    // Initialiser et démarrer le serveur
-    pServer = new ServerSocket(80);
-    if (!pServer->StartAsyncListening(hwnd)) {
+    //PRINT("APP INIT");
+    pServer = new ServerSocket(80, hInstance);
+    if (!pServer->StartAsyncListening()) {
         return;
     }
 

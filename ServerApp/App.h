@@ -1,22 +1,16 @@
-
 #pragma once
 
 #include "Includes.h"
-#include "ServerSocket.h"
-#include "Morpion.h"
-#include "Player.h"
+
+class ServerSocket;
+class Morpion;
+class Player;
+
+
 
 class App {
 private:
-    HWND hwnd;
-    ServerSocket* pServer;
-    Morpion* myMorpion;
-    int turnCounter;
-    Player* player1;
-    Player* player2;
-    int playerNumber;
 
-    FILE* pCout;
 
     // Instance statique de la classe
     static App* instance;
@@ -25,13 +19,21 @@ private:
     App();
 
 public:
+
+    HWND hwnd;
+    ServerSocket* pServer;
+    Morpion* myMorpion;
+    int turnCounter;
+    Player* player1;
+    Player* player2;
+    int playerNumber;
+
     ~App();
 
     static App* GetInstance();
+    bool turn(sf::Vector2i mousePosition, int turnIndex, SOCKET inputSocket);
 
     void Init(HINSTANCE hInstance);
     void Run();
 };
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow);
