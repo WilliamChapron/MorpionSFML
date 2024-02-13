@@ -1,6 +1,5 @@
 #pragma once
-
-#include <thread>
+#include <windows.h>
 #include <functional>
 
 class Thread
@@ -14,8 +13,9 @@ public:
     void Join();
 
 private:
-    std::thread thread;
+    HANDLE threadHandle;
     std::function<void()> threadFunction;
     bool isRunning;
+    static DWORD WINAPI ThreadFuncWrapper(LPVOID param);
 };
 

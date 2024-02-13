@@ -16,5 +16,6 @@ private:
     HANDLE threadHandle;
     std::function<void()> threadFunction;
     bool isRunning;
+    static DWORD WINAPI ThreadFuncWrapper(LPVOID param);
 };
 

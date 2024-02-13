@@ -9,7 +9,7 @@ Thread::~Thread() {
     }
 }
 
-DWORD WINAPI ThreadFuncWrapper(LPVOID param) {
+DWORD WINAPI Thread::ThreadFuncWrapper(LPVOID param) {
     Thread* pThread = static_cast<Thread*>(param);
     if (pThread) {
         pThread->threadFunction();

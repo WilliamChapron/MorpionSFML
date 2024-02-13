@@ -9,16 +9,25 @@ Thread::~Thread() {
     }
 }
 
+DWORD WINAPI Thread::ThreadFuncWrapper(LPVOID param) {
+    Thread* pThread = static_cast<Thread*>(param);
+    if (pThread) {
+        pThread->threadFunction();
+    }
+    return 0;
+}
+
 void Thread::Start() {
     if (!isRunning) {
         isRunning = true;
-        thread = std::thread(threadFunction);
+        threadHandle = CreateThread(NULL, 0, ThreadFuncWrapper, this, 0, NULL);
     }
 }
 
 void Thread::Join() {
     if (isRunning) {
-        thread.join();
+        WaitForSingleObject(threadHandle, INFINITE);
+        CloseHandle(threadHandle);
         isRunning = false;
     }
 }
