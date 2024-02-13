@@ -7,10 +7,11 @@ class Thread
 public:
 
     Thread(std::function<void()> threadFunction);
-    ~Thread();
+    ~Thread();// fonction Delete 
 
     void Start();
     void Join();
+    void Exit();
 
 private:
     HANDLE threadHandle;

@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include "Player.h"
 #include <iostream>
-
+#include "SThread.h"
 #include "Render.h"
 #include "Defines.h"
 
@@ -131,6 +131,10 @@ void Morpion::drawBoard(Render render) const {
     const float cellWidth = static_cast<float>(render.iWidth - (cols - 1) * spacing) / cols;
     const float cellHeight = static_cast<float>(render.iHeight - (rows - 1) * spacing) / rows;
 
+    Thread Thread([]() {
+
+        });
+
     for (int i = 0; i < 9; ++i) {
         sf::RectangleShape cell(sf::Vector2f(cellWidth, cellHeight));
         int row = i / cols;
@@ -169,6 +173,9 @@ void Morpion::drawBoard(Render render) const {
     }
 
     render.pWindow->display();
+    Thread.Start();
+
+    Thread.Join();
 }
 
 

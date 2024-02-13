@@ -1,7 +1,7 @@
 
 #include "Render.h"
 #include "Morpion.h"
-
+#include "SThread.h"
 
 
 #include "Includes.h"
