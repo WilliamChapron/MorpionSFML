@@ -135,6 +135,7 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Includes.h" />
+    <ClCompile Include="ServerWeb.cpp" />
     <ClCompile Include="sv.cpp" />
     <ClCompile Include="Morpion.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -148,6 +149,7 @@
     <ClInclude Include="Morpion.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="ServerSocket.h" />
+    <ClInclude Include="ServerWeb.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

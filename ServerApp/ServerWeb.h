@@ -1,22 +1,20 @@
-// ServerSocket.h
+// ServerWeb.h
 #pragma once
 
 #include "Includes.h"
 #include "Defines.h"
 #include "JSON.h"
 
-//#include <nlohmann/json.hpp>
-//using json = nlohmann::json;
 
-class ServerSocket {
+class ServerWeb {
 public:
-    ServerSocket(int port, HINSTANCE hInstance);
-    ~ServerSocket();
+    ServerWeb(int port, HINSTANCE hInstance);
+    ~ServerWeb();
 
     bool StartAsyncListening();
     void AddClientSocket(SOCKET clientSocket);
     void BroadcastMessage(const json& jsonData);
-    bool isSocketAtIndex(SOCKET socketToCheck, int indexToCheck);
+    void ResponseMessage(const json& jsonData);
     void Close();
 
 private:

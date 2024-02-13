@@ -1,11 +1,11 @@
-#include "ClientSocket.h"
+﻿#include "ClientWeb.h"
 #include "Defines.h"
 #include "Time.h"
 #include "JSON.h"
 
 
 
-ClientSocket::ClientSocket(const char* serverIp, int serverPort)
+ClientWeb::ClientWeb(const char* serverIp, int serverPort)
 {
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
@@ -26,19 +26,19 @@ ClientSocket::ClientSocket(const char* serverIp, int serverPort)
     ioctlsocket(clientSocket, FIONBIO, &mode);
 }
 
-ClientSocket::~ClientSocket()
+ClientWeb::~ClientWeb()
 {
     closesocket(clientSocket);
     WSACleanup();
 }
 
-bool ClientSocket::Connect()
+bool ClientWeb::Connect()
 {
     PRINT("Connexion ... ");
     return connect(clientSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) != SOCKET_ERROR;
 }
 
-bool ClientSocket::SendMessage(const json& jsonObject) {
+bool ClientWeb::SendMessageWithResponse(const json& jsonObject) {
     std::string message = jsonObject.dump();
 
     float startTime = getCurrentTime();
@@ -48,8 +48,26 @@ bool ClientSocket::SendMessage(const json& jsonObject) {
     }
 
     return true;
-}
 
+    // * Return Response *
+
+    char buffer[4024];
+    int bytesRead;
+
+    while (true) {
+        if (getCurrentTime() > startTime + 10) {
+            std::cout << "Err_Connection_Timed_Out :" << std::endl;
+            return false;
+        }
+
+        bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+        if (bytesRead > 0) {
+            std::string receivedData(buffer, bytesRead);
+            std::cout << "Received from server: " << receivedData << std::endl;
+            return true;
+        }
+    }
+}
 
 
 json ClientSocket::AwaitBroadcast() {
@@ -62,7 +80,7 @@ json ClientSocket::AwaitBroadcast() {
     return receivedJson;
 }
 
-void ClientSocket::Close()
+void ClientWeb::Close()
 {
     closesocket(clientSocket);
 }
