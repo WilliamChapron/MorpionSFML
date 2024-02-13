@@ -3,6 +3,8 @@
 #include "App.h"
 #include "JSON.h"
 #include "Player.h"
+#include "Morpion.h"
+
 
 
 static ServerWeb* currentInstance = nullptr;
@@ -18,7 +20,7 @@ LRESULT CALLBACK ServerWeb::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPAR
     {
         PRINT("LISTEN SOCKET");
         while (true) {
-            SOCKET newClientSocket = accept(myApp->pServer->listenSocket, nullptr, nullptr);
+            SOCKET newClientSocket = accept(currentInstance->listenSocket, nullptr, nullptr);
             if (newClientSocket == INVALID_SOCKET) {
                 break;
             }
@@ -31,10 +33,7 @@ LRESULT CALLBACK ServerWeb::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPAR
 
         PRINT("EVENT CLIENTS");
         SOCKET clientSocket = static_cast<SOCKET>(wParam);
-
-        json receivedJson = ReceiveJsonFromSocket(clientSocket);
-
-
+        currentInstance->ResponseRequest(clientSocket);
 
         break;
     }
@@ -45,23 +44,22 @@ LRESULT CALLBACK ServerWeb::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPAR
     return 0;
 }
 
-ServerWeb::ServerWeb(int port, HINSTANCE hInstance) : port(port), listenSocket(INVALID_SOCKET) {
+ServerWeb::ServerWeb(int port, HINSTANCE hInstance) : port(port), pCout(nullptr), listenSocket(INVALID_SOCKET) {
 
-    AllocConsole(); // Créer une nouvelle console
-    FILE* pCout;
-    freopen_s(&pCout, "CONOUT$", "w", stdout);
+    //AllocConsole(); // Créer une nouvelle console
+    //freopen_s(&pCout, "CONOUT$", "w", stdout);
 
 
     WNDCLASSEX wc = { 0 };
     wc.cbSize = sizeof(WNDCLASSEX);
     wc.lpfnWndProc = ServerWeb::WindowProc;
     wc.hInstance = GetModuleHandle(0);
-    wc.lpszClassName = "MyWindowClass";
+    wc.lpszClassName = "MyWindowClassWeb";
 
     if (!RegisterClassEx(&wc)) {
     }
 
-    hwnd = CreateWindowEx(0, "MyWindowClass", "My Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, GetModuleHandle(0), nullptr);
+    hwnd = CreateWindowEx(0, "MyWindowClassWeb", "My Window Web", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, GetModuleHandle(0), nullptr);
 
     if (!hwnd) {
     }
@@ -148,13 +146,92 @@ void ServerWeb::AddClientSocket(SOCKET clientSocket) {
     }
 }
 
-void ServerWeb::BroadcastMessage(const json& jsonData) {
-    std::string jsonString = jsonData.dump(); // Json to string with nlohmann
 
-    for (SOCKET clientSocket : clientSockets) {
-        send(clientSocket, jsonString.c_str(), jsonString.size(), 0);
+
+
+
+
+std::string GenerateHtmlContent() {
+    App* myApp = App::GetInstance();
+
+
+    std::string htmlContent = R"(
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morpion</title>
+    <style>
+        .cross {
+            color: red;
+        }
+
+        .circle {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Morpion</h1>
+
+    <!-- Tableau pour afficher le morpion -->
+    <table border='1' cellpadding='10'>
+    <tr>
+)";
+
+    // Remplir le tableau avec les symboles
+    for (int i = 0; i < 8; ++i) {
+        // Ajouter une nouvelle ligne à chaque troisième élément
+        if (i % 3 == 0 && i != 0) {
+            htmlContent += "</tr><tr>";
+        }
+
+        htmlContent += "<td>";
+        // Ajouter la classe CSS en fonction du symbole
+        if (myApp->myMorpion->board[i] == Symbol::X) {
+            htmlContent += "<div class='cross'>X</div>";
+        }
+        else if (myApp->myMorpion->board[i] == Symbol::O) {
+            htmlContent += "<div class='circle'>O</div>";
+        }
+        else {
+            htmlContent += "<div>Empty</div>";
+        }
+        htmlContent += "</td>";
     }
+
+    // Fin du contenu HTML
+    htmlContent += R"(
+    </tr>
+    </table>
+</body>
+</html>
+)";
+
+    return htmlContent;
 }
+
+void ServerWeb::ResponseRequest(SOCKET clientSocket) {
+
+
+
+    std::string htmlContent = GenerateHtmlContent();
+
+
+    std::string httpResponse = "HTTP/1.1 200 OK\r\n";
+    httpResponse += "Content-Type: text/html\r\n";
+    httpResponse += "Content-Length: " + std::to_string(htmlContent.size()) + "\r\n";
+    httpResponse += "\r\n";
+
+
+    send(clientSocket, httpResponse.c_str(), httpResponse.size(), 0);
+
+
+    send(clientSocket, htmlContent.c_str(), htmlContent.size(), 0);
+}
+
 
 void ServerWeb::Close() {
     closesocket(listenSocket);

@@ -2,6 +2,7 @@
 #include "App.h"
 #include "JSON.h"
 #include "ServerSocket.h"
+#include "ServerWeb.h"
 #include "Morpion.h"
 
 App* App::instance = nullptr;
@@ -52,22 +53,30 @@ App* App::GetInstance() {
 
 void App::Init(HINSTANCE hInstance) {
 
-    //PRINT("APP INIT");
+    pServerWeb = new ServerWeb(3000, hInstance);
+    if (!pServerWeb->StartAsyncListening()) {
+        return;
+    }
     pServer = new ServerSocket(80, hInstance);
     if (!pServer->StartAsyncListening()) {
         return;
     }
 
     myMorpion = new Morpion();
+
+
 }
 
 void App::Run() {
     MSG msg = {};
     while (true) {
-        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+        if (PeekMessage(&msg, pServer->hwnd, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-
+        if (PeekMessage(&msg, pServerWeb->hwnd, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
     }
 }

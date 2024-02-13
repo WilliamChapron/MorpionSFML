@@ -132,12 +132,10 @@
   <ItemGroup>
     <ClCompile Include="cl.cpp" />
     <ClCompile Include="ClientSocket.cpp" />
-    <ClCompile Include="ClientWeb.cpp" />
     <ClCompile Include="Time.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClientSocket.h" />
-    <ClInclude Include="ClientWeb.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="Includes.h" />
     <ClInclude Include="JSON.h" />

@@ -19,11 +19,13 @@ public:
     bool isSocketAtIndex(SOCKET socketToCheck, int indexToCheck);
     void Close();
 
+    HWND hwnd;
+
 private:
     int port;
     SOCKET listenSocket;
     std::vector<SOCKET> clientSockets;
-    HWND hwnd;
+
     FILE* pCout;
 
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

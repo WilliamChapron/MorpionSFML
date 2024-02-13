@@ -3,6 +3,7 @@
 #include "Includes.h"
 
 class ServerSocket;
+class ServerWeb;
 class Morpion;
 class Player;
 
@@ -22,6 +23,7 @@ public:
 
     HWND hwnd;
     ServerSocket* pServer;
+    ServerWeb* pServerWeb;
     Morpion* myMorpion;
     int turnCounter;
     Player* player1;

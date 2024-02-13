@@ -81,11 +81,6 @@ LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
 
              //Transition next it
         }
-
-
-
-
-
         break;
     }
 
