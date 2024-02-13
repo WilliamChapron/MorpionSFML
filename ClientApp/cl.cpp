@@ -1,7 +1,6 @@
-#include <Ws2tcpip.h>  // Ajout de l'en-tête pour inet_pton
-#include <iostream>
-#include <Winsock2.h>
-#pragma comment(lib, "ws2_32.lib")
+#pragma once
+
+#include "Includes.h"
 
 #include "ClientSocket.h"
 #include "Defines.h"
@@ -9,87 +8,185 @@
 #include "Time.h"
 #include <chrono>
 #include <thread>
-#include "Board.h"
-#include <SFML/Graphics.hpp>
+#include "Utils.h"
+#include "JSON.h"
 
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
-int main(Render render, Morpion* morpion){
+void drawBoard(Render render, std::array<Symbol, 9> board) {
+    render.pWindow->clear(sf::Color::Black); // Fond noir
 
-    /*ClientSocket client("127.0.0.1", 80);
-    
-    if (client.Connect()) {
-        client.SendMessage("Premier message");
+    const int cols = 3;
+    const int rows = 3;
+    const float spacing = 5.f;
+    const float cellWidth = static_cast<float>(render.iWidth - (cols - 1) * spacing) / cols;
+    const float cellHeight = static_cast<float>(render.iHeight - (rows - 1) * spacing) / rows;
+
+    for (int i = 0; i < 9; ++i) {
+        sf::RectangleShape cell(sf::Vector2f(cellWidth, cellHeight));
+        int row = i / cols;
+        int col = i % cols;
+        cell.setPosition(col * (cellWidth + spacing), row * (cellHeight + spacing)); 
+        cell.setOutlineThickness(1.f);
+        cell.setOutlineColor(sf::Color::White);
+        cell.setFillColor(sf::Color::Black); 
+
+        Symbol symbol = board[i];
+
+        render.pWindow->draw(cell);
+
+        switch (symbol) {
+        case Symbol::X: {
+            sf::RectangleShape cross;
+            cross.setSize(sf::Vector2f(cellWidth / 2, cellHeight / 2));
+            cross.setPosition(cell.getPosition() + sf::Vector2f(cellWidth / 4, cellHeight / 4));
+            cross.setFillColor(sf::Color::Red);
+            render.pWindow->draw(cross);
+            break;
+        }
+        case Symbol::O: {
+            sf::CircleShape circle(std::min(cellWidth, cellHeight) / 4); // Utilisez la plus petite dimension pour le rayon
+            circle.setPosition(cell.getPosition() + sf::Vector2f(cellWidth / 4, cellHeight / 4));
+            circle.setFillColor(sf::Color::Blue);
+            render.pWindow->draw(circle);
+            break;
+        }
+        default:
+            break;
+        }
     }
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-    client.SendMessage("Deuxième message");
-    */
-   
+
+    render.pWindow->display();
+}
+
+
+
+int updateInput(Render render) {
+    if (render.pWindow->pollEvent(*(render.pEvent))) {
+        if (render.pEvent->type == sf::Event::Closed) {
+            PRINT("CLOSE");
+            render.pWindow->close();
+        }
+        if (render.pEvent->type == sf::Event::MouseButtonPressed && render.pEvent->mouseButton.button == sf::Mouse::Left) {
+            PRINT("left click");
+            return 1;
+        }
+    }
+    return 0;
+}
+
+sf::Vector2i getMousePosition(Render render) {
+    sf::Vector2i currentPosition = sf::Mouse::getPosition((*(render.pWindow)));
+    return currentPosition;
+}
+
+
+
+int main() {
+
+    ClientSocket client("127.0.0.1", 80);
+    client.Connect();
+
 
     //Création d'une fenêtre
-    Render myRenderer{new sf::RenderWindow(sf::VideoMode(640, 480), "SFML"), new sf::Event, 640, 480};
-    Morpion* myMorpion;
-    myMorpion = new Morpion;
+    Render myRenderer{ new sf::RenderWindow(sf::VideoMode(640, 480), "SFML"), new sf::Event, 640, 480 };
 
-    Player* player1 = nullptr;
-    player1 = new Player{ "William", Symbol::X, 0};
-    
-    Player* player2 = nullptr;
-    player2 = new Player{ "Bot", Symbol::O, 0 };
+    std::array<Symbol, 9> board;
+    for (int i = 0; i < 9; ++i) {
+        board[i] = Symbol::Empty;
+    }
+
+    drawBoard(myRenderer, board);
 
 
-    //GameLoop
-    myMorpion->drawBoard(myRenderer);
-    myMorpion->currentPlayer = player1;
-    int turnCounter = 0;
     while (myRenderer.pWindow->isOpen())
     {
 
-    //    
-
-
-    //EVENT
-    int inputState = updateInput(myRenderer);
-    sf::Vector2i getMousePosition(Render render);
-    PRINT(myMorpion.currentPlayer->name)
-        if (inputState == 0) {
-            //PRINT("Pas d'Input")
-            continue;
-        }
-        else if(inputState == 1) {
-            if (!turn(myRenderer, myMorpion, turnCounter))
-            {
-                continue;
-            };
+        int inputState = updateInput(myRenderer);
+        if (inputState == 1) {
+            
+            sf::Vector2i mousePosition = getMousePosition(myRenderer);
+            json message = CreateJsonInputMessage("Input", std::to_string(mousePosition.x), std::to_string(mousePosition.y));
+            client.SendMessage(message);
         }
 
+        ///
+        
+        json board = client.AwaitBroadcast();
+        if (board != json::object()) {
 
+            std::array<Symbol, 9> symbolArray;
+            PrintJson(board["data"]);
 
+            int i = 0;
+            for (const auto& item : board["data"]) {
 
+                if (item == 0) {
+                    symbolArray[i] = Symbol::Empty;
+                    PRINT("rentre1");
+                }
+                else if (item == 1) {
+                    symbolArray[i] = Symbol::X;
+                    PRINT("rentre2");
+                }
+                else if (item == 2) {
+                    symbolArray[i] = Symbol::O;
+                    PRINT("rentre3");
+                }
 
+                i++;
+            }
 
-
-
-        //PRINT("Action")
-
-        //UPDATE
-
-        //DRAW
-        if (myMorpion->checkEnd(Symbol::X) || myMorpion->checkEnd(Symbol::O)) {
-            PRINT("Partie terminé, joueur gagnant :")
-            PRINT(myMorpion->currentPlayer->name);
-            //break;
+            drawBoard(myRenderer, symbolArray);
         }
 
-        // Transition next it
-        myMorpion->currentPlayer = (turnCounter % 2 == 0) ? player2 : player1;
-        turnCounter++;
-
-    return 0;
+    }
 
 
-   // Render myRenderer{ new sf::RenderWindow}
-   //morpion->drawBoard(render);
-
-
-    return 0;
 }
+
+
+
+
+
+
+
+//int main() {
+//    // Première connexion
+//    ClientSocket client("127.0.0.1", 80);
+//    client.Connect();
+//    std::this_thread::sleep_for(std::chrono::seconds(1));
+//    ClientSocket clientt("127.0.0.1", 80);
+//    clientt.Connect();
+//    std::this_thread::sleep_for(std::chrono::seconds(1));
+//    ClientSocket clienttt("127.0.0.1", 80);
+//    clienttt.Connect();
+//    std::this_thread::sleep_for(std::chrono::seconds(1));
+//
+//    std::this_thread::sleep_for(std::chrono::seconds(2));
+//    printTimestamp();
+//    std::cout << "CLIENT 3" << std::endl;
+//    clienttt.SendMessage("CLIENT 3");
+//
+//    std::this_thread::sleep_for(std::chrono::seconds(2));
+//    printTimestamp();
+//    std::cout << "CLIENT 2" << std::endl;
+//    clientt.SendMessage("CLIENT 2");
+//
+//    std::this_thread::sleep_for(std::chrono::seconds(2));
+//    printTimestamp();
+//    std::cout << "CLIENT 1" << std::endl;
+//    client.SendMessage("CLIENT 1");
+//
+//    //while (true) {
+//    //    client.AwaitBroadcast();
+//    //    PRINT("Client 1 recu message broadcast")
+//    //    clientt.AwaitBroadcast();
+//    //    PRINT("Client 2 recu message broadcast")
+//    //    clienttt.AwaitBroadcast();
+//    //    PRINT("Client 3 recu message broadcast")
+//    //}
+//
+//    return 0;
+//}
