@@ -1,8 +1,7 @@
 #pragma once
 
-#include <string> // Inclure la bibliothèque pour std::string
+#include <string> // Inclure la bibliothï¿½que pour std::string
 
-#include "Input.h"
 #include "Morpion.h"
 #include "Defines.h"
 
@@ -14,6 +13,5 @@ struct Player {
     int score;
 
     // Constructeur  arguments "name" "symbol" "score"
-    Player(const std::string& playerName, Symbol playerSymbol, int playerScore)
-        : name(playerName), symbol(playerSymbol), score(playerScore) {}
+    Player(const std::string& playerName, Symbol playerSymbol, int playerScore) : name(playerName), symbol(playerSymbol), score(playerScore) {}
 };

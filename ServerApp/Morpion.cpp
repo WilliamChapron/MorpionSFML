@@ -1,8 +1,10 @@
 #include "Morpion.h"
-#include "Input.h"
-#include <SFML/Graphics.hpp>
+#include "Includes.h"
+
 #include "Player.h"
 #include <iostream>
+
+
 #include "Defines.h"
 
 bool g_gameOver = false;
@@ -27,7 +29,7 @@ int Morpion::placeSymbol(sf::Vector2i mousePosition, int width, int height) {
 
     int globalIndex = (IndexY * iCol) + indexX;
 
-    //PRINT(globalIndex);
+
     //for (const auto& element : board) {
     //    switch (element) {
     //    case Symbol::X:
@@ -41,12 +43,9 @@ int Morpion::placeSymbol(sf::Vector2i mousePosition, int width, int height) {
     //    }
     //}
 
-    PRINT("globalIndex");
-    PRINT(globalIndex);
-
     if (board[globalIndex] == Symbol::Empty) {
         PRINT("Empty")
-            board[globalIndex] = currentPlayer->symbol;
+        board[globalIndex] = currentPlayer->symbol;
         return 0;
     }
 
@@ -56,6 +55,8 @@ int Morpion::placeSymbol(sf::Vector2i mousePosition, int width, int height) {
 
 
 }
+
+
 
 
 bool Morpion::checkHorizontalWin(Symbol playerSymbol) const {
@@ -101,7 +102,8 @@ bool Morpion::checkBoardFull() const {
 }
 
 bool Morpion::checkEnd(Symbol playerSymbol) const {
-    // Check End
     return checkHorizontalWin(playerSymbol) || checkVerticalWin(playerSymbol) || checkDiagonalWin(playerSymbol) || checkBoardFull();
 }
+
+
 

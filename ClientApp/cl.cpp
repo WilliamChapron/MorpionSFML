@@ -60,7 +60,7 @@ void drawBoard(Render render, std::array<Symbol, 9> board) {
     render.pWindow->display();
 }
 
-
+// Input
 
 int updateInput(Render render) {
     if (render.pWindow->pollEvent(*(render.pEvent))) {
@@ -81,7 +81,7 @@ sf::Vector2i getMousePosition(Render render) {
     return currentPosition;
 }
 
-
+//
 
 int main() {
 
@@ -118,15 +118,12 @@ int main() {
             for (const auto& item : boardMessage["data"]) {
                 if (item == 0) {
                     symbolArray[i] = Symbol::Empty;
-                    PRINT("rentre1");
                 }
                 else if (item == 1) {
                     symbolArray[i] = Symbol::X;
-                    PRINT("rentre2");
                 }
                 else if (item == 2) {
                     symbolArray[i] = Symbol::O;
-                    PRINT("rentre3");
                 }
                 i++;
             }

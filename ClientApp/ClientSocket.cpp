@@ -48,27 +48,11 @@ bool ClientSocket::SendMessage(const json& jsonObject) {
     }
 
     return true;
-
-    /*char buffer[4024];
-    int bytesRead;
-
-    while (true) {
-        if (getCurrentTime() > startTime + 10) {
-            std::cout << "Err_Connection_Timed_Out :" << std::endl;
-            return false;
-        }
-
-        bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-        if (bytesRead > 0) {
-            std::string receivedData(buffer, bytesRead);
-            std::cout << "Received from server: " << receivedData << std::endl;
-            return true;
-        }
-    }*/
 }
 
+
+
 json ClientSocket::AwaitBroadcast() {
-    //PRINT("On await");
     json receivedJson = ReceiveJsonFromSocket(clientSocket);
 
     if (!receivedJson.empty()) {
@@ -77,8 +61,6 @@ json ClientSocket::AwaitBroadcast() {
     }
     return receivedJson;
 }
-
-
 
 void ClientSocket::Close()
 {

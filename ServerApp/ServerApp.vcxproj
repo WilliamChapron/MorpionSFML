@@ -133,8 +133,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="App.cpp" />
     <ClCompile Include="Includes.h" />
-    <ClCompile Include="Input.cpp" />
+    <ClCompile Include="ServerWeb.cpp" />
     <ClCompile Include="sv.cpp" />
     <ClCompile Include="Morpion.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -142,12 +143,13 @@
     <ClCompile Include="Time.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="App.h" />
     <ClInclude Include="Defines.h" />
-    <ClInclude Include="Input.h" />
     <ClInclude Include="JSON.h" />
     <ClInclude Include="Morpion.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="ServerSocket.h" />
+    <ClInclude Include="ServerWeb.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
