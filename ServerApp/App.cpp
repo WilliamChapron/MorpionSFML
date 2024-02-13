@@ -27,7 +27,7 @@ bool App:: turn(sf::Vector2i mousePosition, int turnIndex, SOCKET inputSocket) {
         turnCounter++;
 
         // Broadcast board to all clients
-        json boardJson = CreateJsonTable("Message", myMorpion->board);
+        json boardJson = CreateJsonTable("array", myMorpion->board);
         pServer->BroadcastMessage(boardJson);
     }
 
@@ -53,6 +53,10 @@ App* App::GetInstance() {
 
 void App::Init(HINSTANCE hInstance) {
 
+    AllocConsole(); 
+    FILE* pCout;
+    freopen_s(&pCout, "CONOUT$", "w", stdout);
+
     pServerWeb = new ServerWeb(3000, hInstance);
     if (!pServerWeb->StartAsyncListening()) {
         return;
@@ -63,6 +67,7 @@ void App::Init(HINSTANCE hInstance) {
     }
 
     myMorpion = new Morpion();
+
 
 
 }

@@ -44,7 +44,7 @@ LRESULT CALLBACK ServerWeb::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPAR
     return 0;
 }
 
-ServerWeb::ServerWeb(int port, HINSTANCE hInstance) : port(port), pCout(nullptr), listenSocket(INVALID_SOCKET) {
+ServerWeb::ServerWeb(int port, HINSTANCE hInstance) : port(port), listenSocket(INVALID_SOCKET) {
 
     //AllocConsole(); // Créer une nouvelle console
     //freopen_s(&pCout, "CONOUT$", "w", stdout);
@@ -76,8 +76,6 @@ ServerWeb::~ServerWeb() {
         closesocket(clientSocket);
     }
     WSACleanup();
-    fclose(pCout);
-    FreeConsole();
     currentInstance = nullptr;
 }
 
