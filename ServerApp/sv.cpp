@@ -25,6 +25,7 @@
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+
     App* myApp = App::GetInstance();
 
     // Initialise le singleton avec l'instance de l'application

@@ -8,15 +8,15 @@
 static ServerSocket* currentInstance = nullptr;
 
 LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+
     App* myApp = App::GetInstance();
     PRINT("CallBack");
     ServerSocket* currentInstance = reinterpret_cast<ServerSocket*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 
-    if (currentInstance == nullptr) return 0;
-
     switch (uMsg) {
     case WM_LISTEN_SOCKET:
     {
+        PRINT("LISTEN SOCKET");
         while (true) {
             SOCKET newClientSocket = accept(myApp->pServer->listenSocket, nullptr, nullptr);
             if (newClientSocket == INVALID_SOCKET) {
@@ -42,7 +42,7 @@ LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
             // #TODO disconnect parceque on veut pas etablir la connexion
             //printTimestamp();
             std::cout << "Nouvelle connexion établie." << std::endl;
-            myApp->pServer->AddClientSocket(newClientSocket);
+            currentInstance->AddClientSocket(newClientSocket);
 
         }
         break;
@@ -50,7 +50,7 @@ LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
     case WM_CLIENTS_SOCKET:
     {
 
-
+        PRINT("EVENT CLIENTS");
         SOCKET clientSocket = static_cast<SOCKET>(wParam);
 
         json receivedJson = ReceiveJsonFromSocket(clientSocket);
@@ -90,7 +90,7 @@ LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
     }
 
     default:
-        return ServerSocket::WindowProc(hwnd, uMsg, wParam, lParam);
+        return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }
@@ -102,33 +102,23 @@ ServerSocket::ServerSocket(int port, HINSTANCE hInstance) : port(port), listenSo
     freopen_s(&pCout, "CONOUT$", "w", stdout);
 
 
-    WNDCLASS wc = {};
+    WNDCLASSEX wc = { 0 };
+    wc.cbSize = sizeof(WNDCLASSEX);
     wc.lpfnWndProc = ServerSocket::WindowProc;
-    wc.hInstance = GetModuleHandle(nullptr);
+    wc.hInstance = GetModuleHandle(0);
     wc.lpszClassName = "MyWindowClass";
 
-    if (!RegisterClass(&wc)) {
-        // La registration de la classe a échoué
-        PRINT("echoué 1");
+    if (!RegisterClassEx(&wc)) {
     }
 
-    HWND hwnd = CreateWindowEx(
-        0,
-        "MyWindowClass",
-        "My Window",
-        WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, 800, 600,
-        nullptr, nullptr, GetModuleHandle(nullptr), nullptr
-    );
+    hwnd = CreateWindowEx(0, "MyWindowClass", "My Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, GetModuleHandle(0), nullptr);
 
     if (!hwnd) {
-        // La création de la fenêtre a échoué
-        PRINT("echoue");
     }
 
     // La fenêtre a été créée avec succès
     SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-    ShowWindow(hwnd, SW_SHOWNORMAL);
+    ShowWindow(hwnd, SW_HIDE);
 
 
 }
@@ -190,11 +180,6 @@ bool ServerSocket::StartAsyncListening() {
         return false;
     }
 
-    if (WSAAsyncSelect(listenSocket, hwnd, WM_LISTEN_SOCKET, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR) {
-        std::cerr << "Failed to start asynchronous listening." << std::endl;
-        Close();
-        return false;
-    }
 
     if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
         std::cerr << "Failed to listen for incoming connections." << std::endl;

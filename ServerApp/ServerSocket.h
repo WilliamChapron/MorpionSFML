@@ -26,6 +26,6 @@ private:
     HWND hwnd;
     FILE* pCout;
 
-
+    public:
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
