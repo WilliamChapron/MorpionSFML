@@ -11,15 +11,17 @@ public:
     void Init(App* instance);
     void Start();
 
-    virtual void OnThread();
-    
 
+    
+protected:
+    HANDLE thread;
+    App* appInstance;
+    virtual void OnThread();
 private:
 
     static DWORD WINAPI ThreadProc(void* param);
 
-    HANDLE thread;
-    App* appInstance;
+
 
     bool isRunning;
 

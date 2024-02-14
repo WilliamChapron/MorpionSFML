@@ -28,21 +28,37 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     App* myApp = App::GetInstance();
     myApp->Init(hInstance);
 
+    while (true) {
+        myApp->RunServerSocket();
+        myApp->RunServerWeb();
+    }
+
+
+    //ThreadSocket mySocketThread;
+    //ThreadWeb myWebThread;
+    //myWebThread.Init(myApp);
+
+
+
+    //mySocketThread.Init(myApp);
+
+
+    //mySocketThread.Start();
+    //myWebThread.Start();
+
     //while (true) {
-    //    myApp->RunServerSocket();
-    //    myApp->RunServerWeb();
+    //    /*myApp->RunServerSocket();*/
     //}
 
-    //App::RunServerWeb(myApp->pServerWeb);
 
 
 
-    ThreadSocket thread1(myApp);
-    ThreadWeb thread2(myApp);
-    PRINT(myApp->pServer);
-    PRINT(myApp->pServerWeb);
-    thread1.Start(App* instance);
-    thread2.Start(&App::RunServerWeb);
+
+
+
+
+
+
 
     delete myApp;
 

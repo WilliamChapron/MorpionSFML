@@ -1,4 +1,5 @@
 #include "Thread.h"
+#include "Defines.h"
 
 Thread::Thread() : appInstance(nullptr), isRunning(false) 
 {
@@ -14,6 +15,14 @@ void Thread::Init(App* instance) {
     appInstance = instance;
 }
 
+DWORD WINAPI Thread::ThreadProc(void* param)
+{
+    Thread* pThread = (Thread*)param;
+
+    pThread->OnThread();
+    return 0;
+}
+
 void Thread::Start() {
     if (!isRunning) {
         isRunning = true;
@@ -23,26 +32,20 @@ void Thread::Start() {
 
 void Thread::OnThread()
 {
-
+    PRINT("Parent")
 }
 
-DWORD WINAPI Thread::ThreadProc(void* param)
-{
-    Thread* pThread = (Thread*)param;
 
-    pThread->OnThread();
-    return;
-}
 void Thread::Join() {
     if (isRunning) {
-        WaitForSingleObject(threadHandle, INFINITE);
+        WaitForSingleObject(thread, INFINITE);  // Utilisez "thread" au lieu de "threadHandle"
         Exit();
     }
 }
 
 void Thread::Exit() {
     if (isRunning) {
-        CloseHandle(threadHandle);
+        CloseHandle(thread);
         isRunning = false;
     }
 }

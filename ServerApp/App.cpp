@@ -7,7 +7,7 @@
 
 App* App::instance = nullptr;
 
-App::App() : pServer(nullptr), myMorpion(nullptr), turnCounter(0), player1(nullptr), player2(nullptr), playerNumber(0) {
+App::App() : myMorpion(nullptr), turnCounter(0), player1(nullptr), player2(nullptr), playerNumber(0) {
 }
 
 
@@ -70,25 +70,40 @@ void App::Init(HINSTANCE hInstance) {
 
     myMorpion = new Morpion();
 
+    //PRINT("pServer");
+    //PRINT(pServer->hwnd);
+    //PRINT("pServerWeb");
+    //PRINT(pServerWeb->hwnd);
+
+    PRINT(pServer);
+
 
 
 }
+
 void App::RunServerSocket() {
-    while (true) {
-        MSG msg = {};
-        if (PeekMessage(&msg, pServer->hwnd, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
+    //PRINT("pServer");
+    //PRINT(pServer);
+    //App* myApp = App::GetInstance();
+    //PRINT(myApp->pServer);
+    PRINT("Thread1");
+    MSG msg = {};
+    if (PeekMessage(&msg, pServer->hwnd, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
     }
+    PRINT("Fin thread");
 }
 
 void App::RunServerWeb() {
-    while (true) {
-        MSG msg = {};
-        if (PeekMessage(&msg, pServerWeb->hwnd, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
+    MSG msg = {};
+    //PRINT("pServerWeb");
+    //PRINT(pServerWeb);
+    PRINT("Thread2");
+    if (PeekMessage(&msg, pServerWeb->hwnd, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
     }
+    PRINT("Fin thread");
+
 }

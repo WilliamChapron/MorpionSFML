@@ -10,6 +10,7 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="ServerWeb.cpp" />
     <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="Threads.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Player.h" />
@@ -20,6 +21,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="ServerWeb.h" />
     <ClInclude Include="Thread.h" />
+    <ClInclude Include="Threads.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

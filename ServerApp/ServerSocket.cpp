@@ -9,6 +9,7 @@ static ServerSocket* currentInstance = nullptr;
 
 LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
+
     App* myApp = App::GetInstance();
     ServerSocket* currentInstance = reinterpret_cast<ServerSocket*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 
@@ -17,20 +18,20 @@ LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
     {
         PRINT("LISTEN SOCKET");
         while (true) {
-            SOCKET newClientSocket = accept(myApp->pServer->listenSocket, nullptr, nullptr);
+            SOCKET newClientSocket = accept(myApp->GetServerSocket()->listenSocket, nullptr, nullptr);
             if (newClientSocket == INVALID_SOCKET) {
                 break;
             }
 
-            if (myApp->player1 == nullptr || myApp->player2 == nullptr) {
-                if (myApp->player1 == nullptr && myApp->player2 == nullptr) {
+            if (myApp->GetPlayer1() == nullptr || myApp->GetPlayer2() == nullptr) {
+                if (myApp->GetPlayer1() == nullptr && myApp->GetPlayer2() == nullptr) {
                     PRINT("Set player1");
-                    myApp->player1 = new Player("Player1", Symbol::X, 0);
-                    myApp->myMorpion->currentPlayer = myApp->player1;
+                    myApp->SetPlayer1(new Player("Player1", Symbol::O, 0));
+                    myApp->GetMorpion()->currentPlayer = myApp->GetPlayer1();
                 }
-                else if (myApp->player1 != nullptr && myApp->player2 == nullptr) {
+                else if (myApp->GetPlayer1() != nullptr && myApp->GetPlayer2() == nullptr) {
                     PRINT("Set player2");
-                    myApp->player2 = new Player("Player2", Symbol::O, 0);
+                    myApp->SetPlayer2(new Player("Player2", Symbol::O, 0));
                 }
             }
             else {
@@ -59,11 +60,11 @@ LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
                 std::stoi(receivedJson["y"].get<std::string>())
             };
 
-            int index = myApp->turnCounter % 2;
+            int index = myApp->GetTurnCounter() % 2;
             myApp->turn(mousePosition, index, clientSocket);
 
-            if (myApp->myMorpion->checkEnd(Symbol::X) || myApp->myMorpion->checkEnd(Symbol::O)) {
-                Symbol winningPlayer = myApp->myMorpion->currentPlayer->symbol;
+            if (myApp->GetMorpion()->checkEnd(Symbol::X) || myApp->GetMorpion()->checkEnd(Symbol::O)) {
+                Symbol winningPlayer = myApp->GetMorpion()->currentPlayer->symbol;
                 json resultMessage;
 
                 if (winningPlayer == Symbol::X) {
@@ -75,7 +76,7 @@ LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
                 else {
                     resultMessage = CreateJsonMessage("end", "equal");
                 }
-                myApp->pServer->BroadcastMessage(resultMessage);
+                myApp->GetServerSocket()->BroadcastMessage(resultMessage);
             }
         }
         break;
