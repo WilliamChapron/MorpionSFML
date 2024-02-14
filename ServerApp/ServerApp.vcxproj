@@ -140,6 +140,7 @@
     <ClCompile Include="Morpion.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="ServerSocket.cpp" />
+    <ClCompile Include="Thread.cpp" />
     <ClCompile Include="Time.h" />
   </ItemGroup>
   <ItemGroup>
@@ -150,6 +151,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="ServerSocket.h" />
     <ClInclude Include="ServerWeb.h" />
+    <ClInclude Include="Thread.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -1,13 +1,12 @@
 
 
 #include "Morpion.h"
-
 #include "App.h"
-
 #include "Includes.h"
 #include "ServerSocket.h"
 #include "Defines.h"
 #include "Morpion.h"
+#include "Thread.h"
 
 #include "Time.h"
 #include "Player.h"
@@ -25,22 +24,26 @@
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-
     App* myApp = App::GetInstance();
-
-    // Initialise le singleton avec l'instance de l'application
-    //OutputDebugStringA("------------------------------------------------------------------point dentree------------------------------------------------------------------");
     myApp->Init(hInstance);
 
-    // Exécute l'application
-    myApp->Run();
+    //while (true) {
+    //    myApp->RunServerSocket();
+    //    myApp->RunServerWeb();
+    //}
 
-    // Libère la mémoire utilisée par le singleton (facultatif, car l'OS libérera la mémoire à la fin du programme)
+    //App::RunServerWeb(myApp->pServerWeb);
+
+
+    Thread thread1;
+    Thread thread2;
+    thread1.Start(&App::RunServerSocket);
+    thread2.Start(&App::RunServerWeb);
+
     delete myApp;
 
     return 0;
 }
-
 
 
 

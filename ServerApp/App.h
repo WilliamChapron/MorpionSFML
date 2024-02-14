@@ -36,6 +36,7 @@ public:
     bool turn(sf::Vector2i mousePosition, int turnIndex, SOCKET inputSocket);
 
     void Init(HINSTANCE hInstance);
-    void Run();
+    static void RunServerSocket();
+    static void RunServerWeb();
 };
 

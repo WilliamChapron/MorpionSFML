@@ -71,17 +71,25 @@ void App::Init(HINSTANCE hInstance) {
 
 
 }
-
-void App::Run() {
+void App::RunServerSocket() {
+    App* myApp = App::GetInstance();
     MSG msg = {};
-    while (true) {
-        if (PeekMessage(&msg, pServer->hwnd, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-        if (PeekMessage(&msg, pServerWeb->hwnd, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
+    if (PeekMessage(&msg, myApp->pServer->hwnd, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
     }
+
+    RunServerSocket();
+}
+
+void App::RunServerWeb() {
+    App* myApp = App::GetInstance();
+
+    MSG msg = {};
+    if (PeekMessage(&msg, myApp->pServerWeb->hwnd, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    RunServerWeb();
 }

@@ -1,21 +1,23 @@
 #pragma once
 #include "Includes.h"
-#include <functional>
 
-class Thread
-{
+class App;
+
+class Thread {
 public:
+    Thread();
+    ~Thread();
 
-    Thread(std::function<void()> threadFunction);
-    ~Thread();// fonction Delete 
-
-    void Start();
-    void Join(HANDLE threadHandle);
-    void Exit();
+    void Start(void (*function)());
 
 private:
     HANDLE threadHandle;
-    std::function<void()> threadFunction;
+    LPARAM threadParams;  // Utiliser LPARAM pour stocker les paramètres nécessaires
+    App* appInstance;
     bool isRunning;
     static DWORD WINAPI ThreadFuncWrapper(LPVOID param);
+
+    // Ajoutez ces méthodes si nécessaire
+    void Join();
+    void Exit();
 };
