@@ -1,48 +1,45 @@
-
 #include "Threads.h"
 #include "App.h"
 #include "Defines.h"
+#include "ServerSocket.h"
 
-ThreadWeb::ThreadWeb() : Thread() 
+ThreadClients::ThreadClients() : Thread()
 {
 }
 
-void ThreadWeb::OnThread() {
-    App* myApp = App::GetInstance();
-    while (true) {
+void ThreadClients::Init(ServerSocket* instance, App* myApp, WPARAM wParam) {
+    instanceFunc = instance;
+    args.myApp = myApp;
+    args.wParam = wParam;
+}
+
+void ThreadClients::OnThread() {
+    //App* myApp = App::GetInstance();
+    /*while (true) {
         myApp->RunServerWeb();
-    }
-    //PRINT(myApp->pServer);
-    //while (true) {
-    //    
-    //}
-
-    //while (true) {
-    //    PRINT("THREAD WEB");
-    //}
-
+    }*/
+    instanceFunc->HandleClientsSocket(args.myApp, args.wParam);
+    PRINT("THREAD CLIENTS");
 }
 
-ThreadSocket::ThreadSocket() : Thread() 
+ThreadListen::ThreadListen() : Thread()
 {
 }
 
-void ThreadSocket::OnThread() {
-    App* myApp = App::GetInstance();
 
-    //PRINT(myApp);
-    //while (true) {
-    //    PRINT("THREAD SOCKET ");
-    //}
-    //PRINT(myApp->GetServerSocket());
+void ThreadListen::Init(ServerSocket* instance, App* myApp, ServerSocket* currentInstance) {
+    instanceFunc = instance;
+    args.myApp = myApp;
+    args.currentInstance = currentInstance;
+}
 
-        //PRINT(myApp->pServer);
-    //for (int i = 0; i < 1000; ++i) {
-    //    myApp->RunServerSocket();
-    //}
+void ThreadListen::OnThread() {
+    /*App* myApp = App::GetInstance();
     while (true) {
         myApp->RunServerSocket();
-    }
+    }*/
+    instanceFunc->HandleListenSocket(args.myApp, args.currentInstance);
 
+    PRINT("THREAD LISTEN");
 
 }

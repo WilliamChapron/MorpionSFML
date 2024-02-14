@@ -52,11 +52,9 @@ App* App::GetInstance() {
 }
 
 void App::Init(HINSTANCE hInstance) {
-
     AllocConsole(); 
     FILE* pCout;
     freopen_s(&pCout, "CONOUT$", "w", stdout);
-
     pServerWeb = new ServerWeb(3000, hInstance);
     if (!pServerWeb->StartAsyncListening()) {
         return;
@@ -65,45 +63,22 @@ void App::Init(HINSTANCE hInstance) {
     if (!pServer->StartAsyncListening()) {
         return;
     }
-
-
-
     myMorpion = new Morpion();
-
-    //PRINT("pServer");
-    //PRINT(pServer->hwnd);
-    //PRINT("pServerWeb");
-    //PRINT(pServerWeb->hwnd);
-
-    PRINT(pServer);
-
-
-
 }
 
 void App::RunServerSocket() {
-    //PRINT("pServer");
-    //PRINT(pServer);
-    //App* myApp = App::GetInstance();
-    //PRINT(myApp->pServer);
-    PRINT("Thread1");
     MSG msg = {};
     if (PeekMessage(&msg, pServer->hwnd, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-    PRINT("Fin thread");
 }
 
 void App::RunServerWeb() {
     MSG msg = {};
-    //PRINT("pServerWeb");
-    //PRINT(pServerWeb);
-    PRINT("Thread2");
     if (PeekMessage(&msg, pServerWeb->hwnd, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-    PRINT("Fin thread");
 
 }

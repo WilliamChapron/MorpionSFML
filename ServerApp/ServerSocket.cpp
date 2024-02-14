@@ -3,89 +3,103 @@
 #include "App.h"
 #include "JSON.h"
 #include "Player.h"
+#include "Threads.h"
 
 
 static ServerSocket* currentInstance = nullptr;
 
 LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-
-
     App* myApp = App::GetInstance();
     ServerSocket* currentInstance = reinterpret_cast<ServerSocket*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+
+    ThreadListen myThreadListen;
+    ThreadClients myThreadClients;
 
     switch (uMsg) {
     case WM_LISTEN_SOCKET:
     {
-        PRINT("LISTEN SOCKET");
-        while (true) {
-            SOCKET newClientSocket = accept(myApp->GetServerSocket()->listenSocket, nullptr, nullptr);
-            if (newClientSocket == INVALID_SOCKET) {
-                break;
-            }
+        PRINT("HEy");
 
-            if (myApp->GetPlayer1() == nullptr || myApp->GetPlayer2() == nullptr) {
-                if (myApp->GetPlayer1() == nullptr && myApp->GetPlayer2() == nullptr) {
-                    PRINT("Set player1");
-                    myApp->SetPlayer1(new Player("Player1", Symbol::O, 0));
-                    myApp->GetMorpion()->currentPlayer = myApp->GetPlayer1();
-                }
-                else if (myApp->GetPlayer1() != nullptr && myApp->GetPlayer2() == nullptr) {
-                    PRINT("Set player2");
-                    myApp->SetPlayer2(new Player("Player2", Symbol::O, 0));
-                }
-            }
-            else {
-                break;
-            }
+        myThreadListen.Init(currentInstance, myApp, currentInstance);
+        myThreadListen.Start();
 
-            // #TODO disconnect parceque on veut pas etablir la connexion
-            std::cout << "Nouvelle connexion établie." << std::endl;
-            currentInstance->AddClientSocket(newClientSocket);
-
-        }
-        break;
     }
     case WM_CLIENTS_SOCKET:
     {
+        PRINT("HEy2");
 
-        //PRINT("EVENT CLIENTS");
-        SOCKET clientSocket = static_cast<SOCKET>(wParam);
+        myThreadClients.Init(currentInstance, myApp, wParam);
+        myThreadClients.Start();
 
-        json receivedJson = ReceiveJsonFromSocket(clientSocket);
-
-        if (!receivedJson.empty()) {
-
-            sf::Vector2i mousePosition = {
-                std::stoi(receivedJson["x"].get<std::string>()),
-                std::stoi(receivedJson["y"].get<std::string>())
-            };
-
-            int index = myApp->GetTurnCounter() % 2;
-            myApp->turn(mousePosition, index, clientSocket);
-
-            if (myApp->GetMorpion()->checkEnd(Symbol::X) || myApp->GetMorpion()->checkEnd(Symbol::O)) {
-                Symbol winningPlayer = myApp->GetMorpion()->currentPlayer->symbol;
-                json resultMessage;
-
-                if (winningPlayer == Symbol::X) {
-                    resultMessage = CreateJsonMessage("end", "O");
-                }
-                else if (winningPlayer == Symbol::O) {
-                    resultMessage = CreateJsonMessage("end", "X");
-                }
-                else {
-                    resultMessage = CreateJsonMessage("end", "equal");
-                }
-                myApp->GetServerSocket()->BroadcastMessage(resultMessage);
-            }
-        }
-        break;
+        break; 
     }
-
     default:
         return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
+
+    // Wait Thread finish before exit
+    WaitForSingleObject(myThreadListen.thread, INFINITE);
+    WaitForSingleObject(myThreadClients.thread, INFINITE);
+    myThreadListen.Exit();
+    myThreadClients.Exit();
+
+
     return 0;
+}
+
+void ServerSocket::HandleListenSocket(App* myApp, ServerSocket* currentInstance) {
+    SOCKET newClientSocket = accept(myApp->GetServerSocket()->listenSocket, nullptr, nullptr);
+    if (newClientSocket == INVALID_SOCKET) {
+        return;
+    }
+
+    if (myApp->GetPlayer1() == nullptr || myApp->GetPlayer2() == nullptr) {
+        SetPlayers(myApp);
+        std::cout << "Nouvelle connexion établie." << std::endl;
+        currentInstance->AddClientSocket(newClientSocket);
+    }
+
+}
+
+void ServerSocket::HandleClientsSocket(App* myApp, WPARAM wParam) {
+    SOCKET clientSocket = static_cast<SOCKET>(wParam);
+    json receivedJson = ReceiveJsonFromSocket(clientSocket);
+
+    if (!receivedJson.empty()) {
+        sf::Vector2i mousePosition = {
+            std::stoi(receivedJson["x"].get<std::string>()),
+            std::stoi(receivedJson["y"].get<std::string>())
+        };
+
+        int index = myApp->GetTurnCounter() % 2;
+        myApp->turn(mousePosition, index, clientSocket);
+
+        if (myApp->GetMorpion()->checkEnd(Symbol::X) || myApp->GetMorpion()->checkEnd(Symbol::O)) {
+            Symbol winningPlayer = myApp->GetMorpion()->currentPlayer->symbol;
+            json resultMessage;
+
+            if (winningPlayer == Symbol::X) {
+                resultMessage = CreateJsonMessage("end", "O");
+            }
+            else if (winningPlayer == Symbol::O) {
+                resultMessage = CreateJsonMessage("end", "X");
+            }
+            else {
+                resultMessage = CreateJsonMessage("end", "equal");
+            }
+            myApp->GetServerSocket()->BroadcastMessage(resultMessage);
+        }
+    }
+}
+
+void ServerSocket::SetPlayers(App* myApp) {
+    if (myApp->GetPlayer1() == nullptr && myApp->GetPlayer2() == nullptr) {
+        myApp->SetPlayer1(new Player("Player1", Symbol::X, 0));
+        myApp->GetMorpion()->currentPlayer = myApp->GetPlayer1();
+    }
+    else if (myApp->GetPlayer1() != nullptr && myApp->GetPlayer2() == nullptr) {
+        myApp->SetPlayer2(new Player("Player2", Symbol::O, 0));
+    }
 }
 
 ServerSocket::ServerSocket(int port, HINSTANCE hInstance) : port(port), listenSocket(INVALID_SOCKET){
@@ -194,11 +208,9 @@ bool ServerSocket::isSocketAtIndex(SOCKET socketToCheck, int indexToCheck) {
     auto it = std::find(clientSockets.begin(), clientSockets.end(), socketToCheck);
 
     if (it != clientSockets.end() && std::distance(clientSockets.begin(), it) == indexToCheck) {
-        //PRINT("Return true - Socket in vector");
         return true;
     }
     else {
-        //PRINT("Return false - Socket not in vector");
         return false;
     }
 }

@@ -34,7 +34,6 @@ ClientSocket::~ClientSocket()
 
 bool ClientSocket::Connect()
 {
-    PRINT("Connexion ... ");
     return connect(clientSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) != SOCKET_ERROR;
 }
 

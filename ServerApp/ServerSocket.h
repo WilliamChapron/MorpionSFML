@@ -5,8 +5,7 @@
 #include "Defines.h"
 #include "JSON.h"
 
-//#include <nlohmann/json.hpp>
-//using json = nlohmann::json;
+class App;
 
 class ServerSocket {
 public:
@@ -19,6 +18,10 @@ public:
     bool isSocketAtIndex(SOCKET socketToCheck, int indexToCheck);
     void Close();
 
+    void HandleListenSocket(App* myApp, ServerSocket* currentInstance);
+    void HandleClientsSocket(App* myApp, WPARAM wParam);
+    void SetPlayers(App* myApp);
+
     HWND hwnd;
 
 private:
@@ -27,4 +30,6 @@ private:
     std::vector<SOCKET> clientSockets;
 
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+
 };

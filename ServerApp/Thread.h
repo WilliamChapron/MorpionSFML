@@ -8,15 +8,18 @@ public:
     Thread();
     ~Thread();
 
-    void Init(App* instance);
+
     void Start();
+    void Exit();
 
+    virtual void OnThread();
 
+    HANDLE thread;
     
 protected:
-    HANDLE thread;
+
     App* appInstance;
-    virtual void OnThread();
+
 private:
 
     static DWORD WINAPI ThreadProc(void* param);
@@ -25,7 +28,5 @@ private:
 
     bool isRunning;
 
-    // Ajoutez ces méthodes si nécessaire
-    void Join();
-    void Exit();
+
 };

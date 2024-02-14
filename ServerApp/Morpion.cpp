@@ -17,10 +17,8 @@ int Morpion::placeSymbol(sf::Vector2i mousePosition, int width, int height) {
 
     int iCol = 3;
 
-
     const float cellWidth = CALCULATE_CELL_SIZE(width, iCol, 5);
     const float cellHeight = CALCULATE_CELL_SIZE(height, iCol, 5);
-
 
     int indexX = CALCULATE_MOUSE_TO_INDEX(mousePosition.x, 5, cellWidth);
     int IndexY = CALCULATE_MOUSE_TO_INDEX(mousePosition.y, 5, cellHeight);
@@ -29,16 +27,10 @@ int Morpion::placeSymbol(sf::Vector2i mousePosition, int width, int height) {
 
 
     if (board[globalIndex] == Symbol::Empty) {
-        PRINT("Empty")
         board[globalIndex] = currentPlayer->symbol;
         return 0;
     }
-
-    PRINT("No Empty")
-        return 1;
-
-
-
+    return 1;
 }
 
 

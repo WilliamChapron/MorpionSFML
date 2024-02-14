@@ -6,13 +6,6 @@ Thread::Thread() : appInstance(nullptr), isRunning(false)
 }
 
 Thread::~Thread() {
-    if (isRunning) {
-        Join();
-    }
-}
-
-void Thread::Init(App* instance) {
-    appInstance = instance;
 }
 
 DWORD WINAPI Thread::ThreadProc(void* param)
@@ -32,15 +25,7 @@ void Thread::Start() {
 
 void Thread::OnThread()
 {
-    PRINT("Parent")
-}
 
-
-void Thread::Join() {
-    if (isRunning) {
-        WaitForSingleObject(thread, INFINITE);  // Utilisez "thread" au lieu de "threadHandle"
-        Exit();
-    }
 }
 
 void Thread::Exit() {

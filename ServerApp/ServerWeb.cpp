@@ -12,29 +12,23 @@ static ServerWeb* currentInstance = nullptr;
 LRESULT CALLBACK ServerWeb::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
     App* myApp = App::GetInstance();
-    PRINT("CallBack");
     ServerWeb* currentInstance = reinterpret_cast<ServerWeb*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 
     switch (uMsg) {
     case WM_LISTEN_SOCKET:
     {
-        PRINT("LISTEN SOCKET");
-        while (true) {
-            SOCKET newClientSocket = accept(currentInstance->listenSocket, nullptr, nullptr);
-            if (newClientSocket == INVALID_SOCKET) {
-                break;
-            }
-            currentInstance->AddClientSocket(newClientSocket);
+
+        SOCKET newClientSocket = accept(currentInstance->listenSocket, nullptr, nullptr);
+        if (newClientSocket == INVALID_SOCKET) {
+            break;
         }
+        currentInstance->AddClientSocket(newClientSocket);
         break;
     }
     case WM_CLIENTS_SOCKET:
     {
-
-        PRINT("EVENT CLIENTS");
         SOCKET clientSocket = static_cast<SOCKET>(wParam);
         currentInstance->ResponseRequest(clientSocket);
-
         break;
     }
 
@@ -45,11 +39,6 @@ LRESULT CALLBACK ServerWeb::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPAR
 }
 
 ServerWeb::ServerWeb(int port, HINSTANCE hInstance) : port(port), listenSocket(INVALID_SOCKET) {
-
-    //AllocConsole(); // Créer une nouvelle console
-    //freopen_s(&pCout, "CONOUT$", "w", stdout);
-
-
     WNDCLASSEX wc = { 0 };
     wc.cbSize = sizeof(WNDCLASSEX);
     wc.lpfnWndProc = ServerWeb::WindowProc;
@@ -58,13 +47,8 @@ ServerWeb::ServerWeb(int port, HINSTANCE hInstance) : port(port), listenSocket(I
 
     if (!RegisterClassEx(&wc)) {
     }
-
     hwnd = CreateWindowEx(0, "MyWindowClassWeb", "My Window Web", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, GetModuleHandle(0), nullptr);
 
-    if (!hwnd) {
-    }
-
-    // La fenêtre a été créée avec succès
     SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
     ShowWindow(hwnd, SW_HIDE);
 
@@ -80,9 +64,6 @@ ServerWeb::~ServerWeb() {
 }
 
 bool ServerWeb::StartAsyncListening() {
-    PRINT("StartAsyncListening");
-
-
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         std::cerr << "Failed to initialize Winsock." << std::endl;
@@ -135,6 +116,8 @@ bool ServerWeb::StartAsyncListening() {
 
     return true;
 }
+
+
 void ServerWeb::AddClientSocket(SOCKET clientSocket) {
     clientSockets.push_back(clientSocket);
 
@@ -145,13 +128,8 @@ void ServerWeb::AddClientSocket(SOCKET clientSocket) {
 }
 
 
-
-
-
-
 std::string GenerateHtmlContent() {
     App* myApp = App::GetInstance();
-
 
     std::string htmlContent = R"(
 <!DOCTYPE html>
@@ -213,11 +191,7 @@ std::string GenerateHtmlContent() {
 
 void ServerWeb::ResponseRequest(SOCKET clientSocket) {
 
-
-
     std::string htmlContent = GenerateHtmlContent();
-
-
     std::string httpResponse = "HTTP/1.1 200 OK\r\n";
     httpResponse += "Content-Type: text/html\r\n";
     httpResponse += "Content-Length: " + std::to_string(htmlContent.size()) + "\r\n";
@@ -225,8 +199,6 @@ void ServerWeb::ResponseRequest(SOCKET clientSocket) {
 
 
     send(clientSocket, httpResponse.c_str(), httpResponse.size(), 0);
-
-
     send(clientSocket, htmlContent.c_str(), htmlContent.size(), 0);
 }
 

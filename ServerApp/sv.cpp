@@ -33,33 +33,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         myApp->RunServerWeb();
     }
 
-
-    //ThreadSocket mySocketThread;
-    //ThreadWeb myWebThread;
-    //myWebThread.Init(myApp);
-
-
-
-    //mySocketThread.Init(myApp);
-
-
-    //mySocketThread.Start();
-    //myWebThread.Start();
-
-    //while (true) {
-    //    /*myApp->RunServerSocket();*/
-    //}
-
-
-
-
-
-
-
-
-
-
-
     delete myApp;
 
     return 0;
