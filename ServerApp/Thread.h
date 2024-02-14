@@ -8,14 +8,20 @@ public:
     Thread();
     ~Thread();
 
-    void Start(void (*function)());
+    void Init(App* instance);
+    void Start();
+
+    virtual void OnThread();
+    
 
 private:
-    HANDLE threadHandle;
-    LPARAM threadParams;  // Utiliser LPARAM pour stocker les paramètres nécessaires
+
+    static DWORD WINAPI ThreadProc(void* param);
+
+    HANDLE thread;
     App* appInstance;
+
     bool isRunning;
-    static DWORD WINAPI ThreadFuncWrapper(LPVOID param);
 
     // Ajoutez ces méthodes si nécessaire
     void Join();

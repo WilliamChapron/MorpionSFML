@@ -7,6 +7,7 @@
 #include "Defines.h"
 #include "Morpion.h"
 #include "Thread.h"
+#include "Threads.h"
 
 #include "Time.h"
 #include "Player.h"
@@ -35,9 +36,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     //App::RunServerWeb(myApp->pServerWeb);
 
 
-    Thread thread1;
-    Thread thread2;
-    thread1.Start(&App::RunServerSocket);
+
+    ThreadSocket thread1(myApp);
+    ThreadWeb thread2(myApp);
+    PRINT(myApp->pServer);
+    PRINT(myApp->pServerWeb);
+    thread1.Start(App* instance);
     thread2.Start(&App::RunServerWeb);
 
     delete myApp;
