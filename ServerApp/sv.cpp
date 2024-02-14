@@ -1,13 +1,13 @@
 
 
 #include "Morpion.h"
-
 #include "App.h"
-
 #include "Includes.h"
 #include "ServerSocket.h"
 #include "Defines.h"
 #include "Morpion.h"
+#include "Thread.h"
+#include "Threads.h"
 
 #include "Time.h"
 #include "Player.h"
@@ -39,11 +39,49 @@
 
         myApp->Run();
 
-        delete myApp;
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    App* myApp = App::GetInstance();
+    myApp->Init(hInstance);
+
+    while (true) {
+        myApp->RunServerSocket();
+        myApp->RunServerWeb();
+    }
+
+
+    //ThreadSocket mySocketThread;
+    //ThreadWeb myWebThread;
+    //myWebThread.Init(myApp);
+
+
+
+    //mySocketThread.Init(myApp);
+
+
+    //mySocketThread.Start();
+    //myWebThread.Start();
+
+    //while (true) {
+    //    /*myApp->RunServerSocket();*/
+    //}
+
+
+
+
+
+
+
+
+
+
+
+    delete myApp;
+
+    return 0;
+}
 
         return 0;
     }
-
 
 
 // #TODO Send Failed to client with send

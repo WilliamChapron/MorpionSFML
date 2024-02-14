@@ -76,7 +76,7 @@ LRESULT CALLBACK ServerWeb::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPAR
     return 0;
 }
 
-ServerWeb::ServerWeb(int port, HINSTANCE hInstance) : port(port), pCout(nullptr), listenSocket(INVALID_SOCKET) {
+ServerWeb::ServerWeb(int port, HINSTANCE hInstance) : port(port), listenSocket(INVALID_SOCKET) {
 
     //AllocConsole(); // Créer une nouvelle console
     //freopen_s(&pCout, "CONOUT$", "w", stdout);
@@ -108,8 +108,6 @@ ServerWeb::~ServerWeb() {
         closesocket(clientSocket);
     }
     WSACleanup();
-    fclose(pCout);
-    FreeConsole();
     currentInstance = nullptr;
 }
 
@@ -220,7 +218,7 @@ std::string GenerateHtmlContent() {
 )";
 
     // Remplir le tableau avec les symboles
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 9; ++i) {
         // Ajouter une nouvelle ligne à chaque troisième élément
         if (i % 3 == 0 && i != 0) {
             htmlContent += "</tr><tr>";
@@ -228,10 +226,10 @@ std::string GenerateHtmlContent() {
 
         htmlContent += "<td>";
         // Ajouter la classe CSS en fonction du symbole
-        if (myApp->myMorpion->board[i] == Symbol::X) {
+        if (myApp->GetMorpion()->board[i] == Symbol::X) {
             htmlContent += "<div class='cross'>X</div>";
         }
-        else if (myApp->myMorpion->board[i] == Symbol::O) {
+        else if (myApp->GetMorpion()->board[i] == Symbol::O) {
             htmlContent += "<div class='circle'>O</div>";
         }
         else {

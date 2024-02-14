@@ -6,7 +6,7 @@
 
 App* App::instance = nullptr;
 
-App::App() : pServer(nullptr), myMorpion(nullptr), turnCounter(0), player1(nullptr), player2(nullptr), playerNumber(0) {
+App::App() : myMorpion(nullptr), turnCounter(0), player1(nullptr), player2(nullptr), playerNumber(0) {
 }
 
 
@@ -26,7 +26,7 @@ bool App:: turn(sf::Vector2i mousePosition, int turnIndex, SOCKET inputSocket) {
         turnCounter++;
 
         // Broadcast board to all clients
-        json boardJson = CreateJsonTable("Message", myMorpion->board);
+        json boardJson = CreateJsonTable("array", myMorpion->board);
         pServer->BroadcastMessage(boardJson);
     }
 
@@ -52,6 +52,10 @@ App* App::GetInstance() {
 
 void App::Init(HINSTANCE hInstance) {
 
+    AllocConsole(); 
+    FILE* pCout;
+    freopen_s(&pCout, "CONOUT$", "w", stdout);
+
     pServerWeb = new ServerWeb(3000, hInstance);
     if (!pServerWeb->StartAsyncListening()) {
         return;
@@ -61,21 +65,44 @@ void App::Init(HINSTANCE hInstance) {
         return;
     }
 
+
+
     myMorpion = new Morpion();
+
+    //PRINT("pServer");
+    //PRINT(pServer->hwnd);
+    //PRINT("pServerWeb");
+    //PRINT(pServerWeb->hwnd);
+
+    PRINT(pServer);
+
 
 
 }
 
-void App::Run() {
+void App::RunServerSocket() {
+    //PRINT("pServer");
+    //PRINT(pServer);
+    //App* myApp = App::GetInstance();
+    //PRINT(myApp->pServer);
+    PRINT("Thread1");
     MSG msg = {};
-    while (true) {
-        if (PeekMessage(&msg, pServer->hwnd, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-        if (PeekMessage(&msg, pServerWeb->hwnd, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
+    if (PeekMessage(&msg, pServer->hwnd, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
     }
+    PRINT("Fin thread");
+}
+
+void App::RunServerWeb() {
+    MSG msg = {};
+    //PRINT("pServerWeb");
+    //PRINT(pServerWeb);
+    PRINT("Thread2");
+    if (PeekMessage(&msg, pServerWeb->hwnd, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+    PRINT("Fin thread");
+
 }

@@ -109,27 +109,43 @@ int main() {
             client.SendMessage(message);
         }
 
-        boardMessage = client.AwaitBroadcast();
-        if (boardMessage != json::object()) {
-            std::array<Symbol, 9> symbolArray;
-            PrintJson(boardMessage["data"]);
+        ///
+        
+        json result = client.AwaitBroadcast();
 
-            int i = 0;
-            for (const auto& item : boardMessage["data"]) {
-                if (item == 0) {
-                    symbolArray[i] = Symbol::Empty;
+        if (result["type"] == "array") {
+            if (board != json::object()) {
+                std::array<Symbol, 9> symbolArray;
+                PrintJson(result["data"]);
+
+                int i = 0;
+                for (const auto& item : result["data"]) {
+                    if (item == 0) {
+                        symbolArray[i] = Symbol::Empty;
+                    }
+                    else if (item == 1) {
+                        symbolArray[i] = Symbol::X;
+                    }
+                    else if (item == 2) {
+                        symbolArray[i] = Symbol::O;
+                    }
+                    i++;
                 }
-                else if (item == 1) {
-                    symbolArray[i] = Symbol::X;
-                }
-                else if (item == 2) {
-                    symbolArray[i] = Symbol::O;
-                }
-                i++;
+
+                drawBoard(myRenderer, symbolArray);
             }
-
-            drawBoard(myRenderer, symbolArray);
         }
+        else if (result["type"] == "end") {
+            std::string resultContent = result["content"];
+            if (resultContent == "equal") {
+                std::cout << "Match nul! Aucun joueur n'a gagné." << std::endl;
+            }
+            else {
+                std::string winner = (resultContent == "X") ? "Player 1 : X" : "Player 2 : O";
+                std::cout << "Le joueur " << winner << " a gagne la partie !" << std::endl;
+            }
+        }
+
 
         json message = client.AwaitBroadcast();
         if (message != json::object()) {

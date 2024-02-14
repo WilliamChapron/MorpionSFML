@@ -8,8 +8,8 @@ static ServerSocket* currentInstance = nullptr;
 
 LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
+
     App* myApp = App::GetInstance();
-    PRINT("CallBack");
     ServerSocket* currentInstance = reinterpret_cast<ServerSocket*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 
     switch (uMsg) {
@@ -17,21 +17,20 @@ LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
     {
         PRINT("LISTEN SOCKET");
         while (true) {
-            SOCKET newClientSocket = accept(myApp->pServer->listenSocket, nullptr, nullptr);
+            SOCKET newClientSocket = accept(myApp->GetServerSocket()->listenSocket, nullptr, nullptr);
             if (newClientSocket == INVALID_SOCKET) {
                 break;
             }
 
-
-            if (myApp->player1 == nullptr || myApp->player2 == nullptr) {
-                if (myApp->player1 == nullptr && myApp->player2 == nullptr) {
+            if (myApp->GetPlayer1() == nullptr || myApp->GetPlayer2() == nullptr) {
+                if (myApp->GetPlayer1() == nullptr && myApp->GetPlayer2() == nullptr) {
                     PRINT("Set player1");
-                    myApp->player1 = new Player("Player1", Symbol::X, 0);
-                    myApp->myMorpion->currentPlayer = myApp->player1;
+                    myApp->SetPlayer1(new Player("Player1", Symbol::O, 0));
+                    myApp->GetMorpion()->currentPlayer = myApp->GetPlayer1();
                 }
-                else if (myApp->player1 != nullptr && myApp->player2 == nullptr) {
+                else if (myApp->GetPlayer1() != nullptr && myApp->GetPlayer2() == nullptr) {
                     PRINT("Set player2");
-                    myApp->player2 = new Player("Player2", Symbol::O, 0);
+                    myApp->SetPlayer2(new Player("Player2", Symbol::O, 0));
                 }
             }
             else {
@@ -39,7 +38,6 @@ LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
             }
 
             // #TODO disconnect parceque on veut pas etablir la connexion
-            //printTimestamp();
             std::cout << "Nouvelle connexion établie." << std::endl;
             currentInstance->AddClientSocket(newClientSocket);
 
@@ -49,7 +47,7 @@ LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
     case WM_CLIENTS_SOCKET:
     {
 
-        PRINT("EVENT CLIENTS");
+        //PRINT("EVENT CLIENTS");
         SOCKET clientSocket = static_cast<SOCKET>(wParam);
 
         json receivedJson = ReceiveJsonFromSocket(clientSocket);
@@ -61,24 +59,24 @@ LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
                 std::stoi(receivedJson["y"].get<std::string>())
             };
 
-
-            // current turn (0 or 1)
-            // current socket
-            int index = myApp->turnCounter % 2;
-            PRINT("current Index");
-            PRINT(index);
-
-
-
+            int index = myApp->GetTurnCounter() % 2;
             myApp->turn(mousePosition, index, clientSocket);
 
-            //if (g_myMorpion->checkEnd(Symbol::X) || g_myMorpion->checkEnd(Symbol::O)) {
-            //    //PRINT("Partie terminé, joueur gagnant :")
-            //    //PRINT(myMorpion->currentPlayer->name);
-            //    //break;
-            //}
+            if (myApp->GetMorpion()->checkEnd(Symbol::X) || myApp->GetMorpion()->checkEnd(Symbol::O)) {
+                Symbol winningPlayer = myApp->GetMorpion()->currentPlayer->symbol;
+                json resultMessage;
 
-             //Transition next it
+                if (winningPlayer == Symbol::X) {
+                    resultMessage = CreateJsonMessage("end", "O");
+                }
+                else if (winningPlayer == Symbol::O) {
+                    resultMessage = CreateJsonMessage("end", "X");
+                }
+                else {
+                    resultMessage = CreateJsonMessage("end", "equal");
+                }
+                myApp->GetServerSocket()->BroadcastMessage(resultMessage);
+            }
         }
         break;
     }
@@ -90,10 +88,6 @@ LRESULT CALLBACK ServerSocket::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
 }
 
 ServerSocket::ServerSocket(int port, HINSTANCE hInstance) : port(port), listenSocket(INVALID_SOCKET){
-
-    AllocConsole(); // Créer une nouvelle console
-    FILE* pCout;
-    freopen_s(&pCout, "CONOUT$", "w", stdout);
 
 
     WNDCLASSEX wc = { 0 };
@@ -107,14 +101,11 @@ ServerSocket::ServerSocket(int port, HINSTANCE hInstance) : port(port), listenSo
 
     hwnd = CreateWindowEx(0, "MyWindowClass", "My Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, GetModuleHandle(0), nullptr);
 
-    if (!hwnd) {
-    }
+    //if (!hwnd) {
+    //}
 
-    // La fenêtre a été créée avec succès
     SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
     ShowWindow(hwnd, SW_HIDE);
-
-
 }
 
 ServerSocket::~ServerSocket() {
@@ -122,8 +113,6 @@ ServerSocket::~ServerSocket() {
         closesocket(clientSocket);
     }
     WSACleanup();
-    fclose(pCout);
-    FreeConsole();
     currentInstance = nullptr;
 }
 
@@ -204,11 +193,11 @@ bool ServerSocket::isSocketAtIndex(SOCKET socketToCheck, int indexToCheck) {
     auto it = std::find(clientSockets.begin(), clientSockets.end(), socketToCheck);
 
     if (it != clientSockets.end() && std::distance(clientSockets.begin(), it) == indexToCheck) {
-        PRINT("Return true - Socket in vector");
+        //PRINT("Return true - Socket in vector");
         return true;
     }
     else {
-        PRINT("Return false - Socket not in vector");
+        //PRINT("Return false - Socket not in vector");
         return false;
     }
 }
