@@ -1,4 +1,3 @@
-// ServerSocket.cpp
 #include "ServerSocket.h"
 #include "App.h"
 #include "JSON.h"
@@ -194,7 +193,7 @@ void ServerSocket::AddClientSocket(SOCKET clientSocket) {
 }
 
 void ServerSocket::BroadcastMessage(const json& jsonData) {
-    std::string jsonString = jsonData.dump(); // Json to string with nlohmann
+    std::string jsonString = jsonData.dump();
 
     for (SOCKET clientSocket : clientSockets) {
         send(clientSocket, jsonString.c_str(), jsonString.size(), 0);

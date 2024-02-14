@@ -135,7 +135,7 @@ int main() {
         if (message != json::object()) {
             if (message["type"] == "win") {
                 std::string winner = message["winner"];
-                if (winner == "draw") {
+                if (winner == "equal") {
                     std::cout << "Match nul! Aucun joueur n'a gagné." << std::endl;
                 }
                 else {

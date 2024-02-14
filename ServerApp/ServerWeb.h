@@ -5,7 +5,13 @@
 #include "Defines.h"
 #include "JSON.h"
 
-
+// Structure de données pour les journaux
+struct WebLog {
+    std::string action;
+    std::string player;
+    std::string symbol;
+    std::string time;
+};
 
 
 class ServerWeb {

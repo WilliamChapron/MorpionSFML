@@ -1,4 +1,3 @@
-// App.cpp
 #include "App.h"
 #include "JSON.h"
 #include "ServerSocket.h"

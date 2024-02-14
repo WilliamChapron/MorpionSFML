@@ -1,10 +1,42 @@
-// ServerWeb.cpp
 #include "ServerWeb.h"
 #include "App.h"
 #include "JSON.h"
 #include "Player.h"
 #include "Morpion.h"
 
+
+std::vector<WebLog> webLogs;
+
+// Fonction pour enregistrer une action dans les journaux
+void LogAction(const std::string& action, const std::string& player, const std::string& symbol) 
+{
+    std::time_t now = std::time(nullptr);
+    struct tm timeinfo;
+    char timeBuffer[100];
+    localtime_s(&timeinfo, &now);
+    strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %H:%M:%S", &timeinfo);
+
+
+    WebLog log;
+    log.action = action;
+    log.player = player;
+    log.symbol = symbol;
+    log.time = timeBuffer;
+
+    webLogs.push_back(log);
+}
+
+// Fonction pour définir un joueur
+void SetPlayer(const std::string& playerName) 
+{
+    LogAction("Set player", playerName, "");
+}
+
+// Fonction pour placer un symbole
+void PlaceSymbol(const std::string& playerName, const std::string& symbol, const std::string& position) 
+{
+    LogAction("Place symbol", playerName, symbol + " at " + position);
+}
 
 
 static ServerWeb* currentInstance = nullptr;
@@ -154,7 +186,6 @@ void ServerWeb::AddClientSocket(SOCKET clientSocket) {
 std::string GenerateHtmlContent() {
     App* myApp = App::GetInstance();
 
-
     std::string htmlContent = R"(
 <!DOCTYPE html>
 <html lang="en">
@@ -170,10 +201,17 @@ std::string GenerateHtmlContent() {
         .circle {
             color: blue;
         }
+
+        .log {
+            float: right;
+            margin-right: 20px;
+            width: 200px;
+            border: 1px solid black;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
-
     <h1>Morpion</h1>
 
     <!-- Tableau pour afficher le morpion -->
@@ -202,16 +240,34 @@ std::string GenerateHtmlContent() {
         htmlContent += "</td>";
     }
 
+    htmlContent += "</tr></table>";
+
+    // Ajouter la section de journal des actions
+    htmlContent += R"(
+    <div class="log">
+        <h2>Logs</h2>
+        <ul>
+    )";
+
+    // Ajouter chaque entrée de journal comme un élément de liste
+    for (const auto& log : webLogs) {
+        htmlContent += "<li>" + log.time + " - " + log.action + " by " + log.player + " (" + log.symbol + ")</li>";
+    }
+
+    htmlContent += R"(
+        </ul>
+    </div>
+    )";
+
     // Fin du contenu HTML
     htmlContent += R"(
-    </tr>
-    </table>
 </body>
 </html>
 )";
 
     return htmlContent;
 }
+
 
 void ServerWeb::ResponseRequest(SOCKET clientSocket) {
 

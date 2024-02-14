@@ -52,8 +52,6 @@ int Morpion::placeSymbol(sf::Vector2i mousePosition, int width, int height) {
     PRINT("No Empty")
         return 1;
 
-
-
 }
 
 
@@ -104,6 +102,3 @@ bool Morpion::checkBoardFull() const {
 bool Morpion::checkEnd(Symbol playerSymbol) const {
     return checkHorizontalWin(playerSymbol) || checkVerticalWin(playerSymbol) || checkDiagonalWin(playerSymbol) || checkBoardFull();
 }
-
-
-

@@ -33,28 +33,16 @@
 //
 //
 
+    int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+        App* myApp = App::GetInstance();
+        myApp->Init(hInstance);
 
-bool turn(sf::Vector2i mousePosition, int turnIndex, SOCKET inputSocket) {
-    //PRINT(player1);
-    //PRINT(player2);
+        myApp->Run();
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+        delete myApp;
 
-    App* myApp = App::GetInstance();
-
-    // Initialise le singleton avec l'instance de l'application
-    //OutputDebugStringA("------------------------------------------------------------------point dentree------------------------------------------------------------------");
-    myApp->Init(hInstance);
-
-    // Exécute l'application
-    myApp->Run();
-
-    // Libère la mémoire utilisée par le singleton (facultatif, car l'OS libérera la mémoire à la fin du programme)
-    delete myApp;
-
-    return 0;
-}
-
+        return 0;
+    }
 
 
 
